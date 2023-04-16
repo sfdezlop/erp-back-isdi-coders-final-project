@@ -45,7 +45,7 @@ export class ProductsMongoRepo {
   }
 
   async leftJoinProductMovements(): Promise<unknown[]> {
-    debug('Instantiated at constructor at stockById method');
+    debug('Instantiated at constructor at leftJoinProductMovements method');
     const data = await ProductModel.aggregate([
       {
         $lookup: {
