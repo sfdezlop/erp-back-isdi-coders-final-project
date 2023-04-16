@@ -115,7 +115,6 @@ describe('Given a new ProductMovementMongoRepo created with a public static func
 //     mongoose.disconnect();
 //   });
 // });
-
 // Describe('When we use the getByFilterWithPaginationAndOrder method', () => {
 //   test('Then the mongoose find method is called', async () => {
 //     const mockedFilter = {

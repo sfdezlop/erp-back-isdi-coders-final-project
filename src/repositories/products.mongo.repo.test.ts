@@ -55,7 +55,7 @@ describe('Given a new ProductsMongoRepo created with a public static function (t
   });
 
   describe('When we use the destroy method to a record that does not exists ', () => {
-    test('Then it should throw an error of Record not found (see error code assigned in user.mongo.repo.ts', async () => {
+    test('Then it should throw an error of Record not found', async () => {
       (ProductModel.findByIdAndDelete as jest.Mock).mockResolvedValue(
         undefined
       );
@@ -94,4 +94,51 @@ describe('Given a new ProductsMongoRepo created with a public static function (t
       expect(ProductModel.findByIdAndUpdate).toHaveBeenCalled();
     });
   });
+
+  describe('When we use the deleteByKey method to a record that does not exists ', () => {
+    test('Then it should throw an error of Record not found', async () => {
+      (ProductModel.findByIdAndUpdate as jest.Mock).mockResolvedValue(
+        undefined
+      );
+      const mockedProduct = {
+        deleteKey: 'id',
+        deleteValue: '2',
+      };
+      mongoose.disconnect();
+      expect(() =>
+        instanceOfProductsMongoRepo.deleteByKey(
+          mockedProduct.deleteKey,
+          mockedProduct.deleteValue
+        )
+      ).rejects.toThrow();
+      expect(ProductModel.findByIdAndDelete).toHaveBeenCalled();
+    });
+  });
+
+  describe('When we use the groupValuesPerField method', () => {
+    test('Then, the mongoose method aggregate is called', async () => {
+      (ProductModel.aggregate as jest.Mock).mockResolvedValue(undefined);
+      expect(() =>
+        instanceOfProductsMongoRepo.groupValuesPerField('mockedField')
+      ).rejects.toThrow();
+      expect(ProductModel.aggregate).toHaveBeenCalled();
+      mongoose.disconnect();
+    });
+  });
 });
+
+// Pending tests with mongoose complex methods
+// Describe('When we use the countFilteredRecords method', () => {
+//   test.only('Then it should throw an error of Record not found (see error code assigned in user.mongo.repo.ts', async () => {
+//     (ProductModel.find().countDocuments as jest.Mock).mockResolvedValue(null);
+//     const mockedFilter = {
+//       filterField: 'id',
+//       filterValue: '2',
+//     };
+//     mongoose.disconnect();
+//     expect(() =>
+//       instanceOfProductsMongoRepo.countFilteredRecords(mockedFilter)
+//     ).rejects.toThrow();
+//     expect(ProductModel.find).toHaveBeenCalled();
+//   });
+// });
