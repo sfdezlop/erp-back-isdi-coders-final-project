@@ -6,7 +6,7 @@ const permissionSchema = new Schema<Permission>({
     type: String,
     required: true,
   },
-  collection: {
+  collectionName: {
     type: String,
   },
   permission: {

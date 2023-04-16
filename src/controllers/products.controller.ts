@@ -131,7 +131,6 @@ export class ProductsController {
     next: NextFunction
   ) {
     try {
-      // Const getId = req.params.id;
       const data = await this.repo.leftJoinProductMovements();
       resp.json({
         results: data,

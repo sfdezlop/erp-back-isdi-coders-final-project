@@ -29,8 +29,6 @@ export class ReqRespController {
       const morganLogTemp = morganLog.toString();
       debug(morganLogTemp);
 
-      // If (!req.body)
-      //   throw new HTTPError(401, 'Unauthorized', 'Invalid Email or password');
       const data = await this.repo.create({ request: 'morganLogTemp' });
       resp.status(201);
       resp.json({

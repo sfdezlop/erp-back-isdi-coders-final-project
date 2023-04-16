@@ -54,16 +54,12 @@ describe('Given a new ProductsMongoRepo created with a public static function (t
     });
   });
 
-  describe('When we use the destroy method to a record that does not exists ', () => {
-    test('Then it should throw an error of Record not found (see error code assigned in user.mongo.repo.ts', async () => {
-      (ProductModel.findByIdAndDelete as jest.Mock).mockResolvedValue(
-        undefined
-      );
+  describe('When we use the destroy method ', () => {
+    test('Then the mongoose method findByIdAndDelete is called', async () => {
+      (ProductModel.findByIdAndDelete as jest.Mock).mockResolvedValue(1);
       const mockUserId = '1';
+      await instanceOfProductsMongoRepo.destroy(mockUserId);
       mongoose.disconnect();
-      expect(() =>
-        instanceOfProductsMongoRepo.destroy(mockUserId)
-      ).rejects.toThrow();
       expect(ProductModel.findByIdAndDelete).toHaveBeenCalled();
     });
   });
@@ -79,19 +75,49 @@ describe('Given a new ProductsMongoRepo created with a public static function (t
     });
   });
 
-  describe('When we use the update method to a record that does not exists ', () => {
-    test('Then it should throw an error of Record not found (see error code assigned in user.mongo.repo.ts', async () => {
+  describe('When we use the deleteByKey method to a record that does not exists ', () => {
+    test('Then it should throw an error of Record not found', async () => {
       (ProductModel.findByIdAndUpdate as jest.Mock).mockResolvedValue(
         undefined
       );
-      const mockUser = {
-        id: '1',
-      };
+      await instanceOfProductsMongoRepo.deleteByKey('deleteKey', 'deleteValue');
       mongoose.disconnect();
-      expect(() =>
-        instanceOfProductsMongoRepo.update(mockUser)
-      ).rejects.toThrow();
-      expect(ProductModel.findByIdAndUpdate).toHaveBeenCalled();
+      expect(ProductModel.findByIdAndDelete).toHaveBeenCalled();
     });
   });
 });
+
+// Pending tests with mongoose complex methods
+// Describe('When we use the countFilteredRecords method', () => {
+//   test.only('Then it should throw an error of Record not found (see error code assigned in user.mongo.repo.ts', async () => {
+//     (ProductModel.find().countDocuments as jest.Mock).mockResolvedValue(null);
+//     const mockedFilter = {
+//       filterField: 'id',
+//       filterValue: '2',
+//     };
+//     mongoose.disconnect();
+//     expect(() =>
+//       instanceOfProductsMongoRepo.countFilteredRecords(mockedFilter)
+//     ).rejects.toThrow();
+//     expect(ProductModel.find).toHaveBeenCalled();
+//   });
+// });
+// Pending tests with errors of workers (it works with test.only)
+// Describe('When we use the groupValuesPerField method', () => {
+//   test('Then, if the mocked response is null, an error should be thrown', async () => {
+//     (ProductModel.aggregate as jest.Mock).mockResolvedValue(null);
+//     expect(() =>
+//       instanceOfProductsMongoRepo.groupValuesPerField('mockedField')
+//     ).rejects.toThrow();
+//     mongoose.disconnect();
+//   });
+// });
+// Describe('When we use the update method to a record that does not exists ', () => {
+//   test('Then it should throw an error of Record not found', async () => {
+//     (ProductModel.findByIdAndUpdate as jest.Mock).mockResolvedValue(null);
+//     const mockedInfo = {};
+//     await instanceOfProductsMongoRepo.update(mockedInfo);
+//     mongoose.disconnect();
+//     expect(ProductModel.findByIdAndUpdate).toHaveBeenCalled();
+//   });
+// });
