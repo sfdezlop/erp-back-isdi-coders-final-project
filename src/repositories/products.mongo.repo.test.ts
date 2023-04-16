@@ -55,7 +55,7 @@ describe('Given a new ProductsMongoRepo created with a public static function (t
   });
 
   describe('When we use the destroy method ', () => {
-    test.only('Then the mongoose method findByIdAndDelete is called', async () => {
+    test('Then the mongoose method findByIdAndDelete is called', async () => {
       (ProductModel.findByIdAndDelete as jest.Mock).mockResolvedValue(1);
       const mockUserId = '1';
       await instanceOfProductsMongoRepo.destroy(mockUserId);
@@ -75,38 +75,13 @@ describe('Given a new ProductsMongoRepo created with a public static function (t
     });
   });
 
-  describe('When we use the update method to a record that does not exists ', () => {
-    test('Then it should throw an error of Record not found (see error code assigned in user.mongo.repo.ts', async () => {
-      (ProductModel.findByIdAndUpdate as jest.Mock).mockResolvedValue(
-        undefined
-      );
-      const mockUser = {
-        id: '',
-      };
-      mongoose.disconnect();
-      // Expect(() =>
-      //   instanceOfProductsMongoRepo.update(mockUser)
-      // ).rejects.toThrow();
-      expect(ProductModel.findByIdAndUpdate).toHaveBeenCalled();
-    });
-  });
-
   describe('When we use the deleteByKey method to a record that does not exists ', () => {
     test('Then it should throw an error of Record not found', async () => {
       (ProductModel.findByIdAndUpdate as jest.Mock).mockResolvedValue(
         undefined
       );
-      const mockedProduct = {
-        deleteKey: 'id',
-        deleteValue: '2',
-      };
+      await instanceOfProductsMongoRepo.deleteByKey('deleteKey', 'deleteValue');
       mongoose.disconnect();
-      // Expect(() =>
-      //   instanceOfProductsMongoRepo.deleteByKey(
-      //     mockedProduct.deleteKey,
-      //     mockedProduct.deleteValue
-      //   )
-      // ).rejects.toThrow();
       expect(ProductModel.findByIdAndDelete).toHaveBeenCalled();
     });
   });
@@ -135,5 +110,14 @@ describe('Given a new ProductsMongoRepo created with a public static function (t
 //       instanceOfProductsMongoRepo.groupValuesPerField('mockedField')
 //     ).rejects.toThrow();
 //     mongoose.disconnect();
+//   });
+// });
+// Describe('When we use the update method to a record that does not exists ', () => {
+//   test('Then it should throw an error of Record not found', async () => {
+//     (ProductModel.findByIdAndUpdate as jest.Mock).mockResolvedValue(null);
+//     const mockedInfo = {};
+//     await instanceOfProductsMongoRepo.update(mockedInfo);
+//     mongoose.disconnect();
+//     expect(ProductModel.findByIdAndUpdate).toHaveBeenCalled();
 //   });
 // });
