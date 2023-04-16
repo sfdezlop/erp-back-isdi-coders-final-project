@@ -94,11 +94,11 @@ describe('Given the user controller', () => {
     test('Then, if you give the search method empty, it should call next function and throw an error', async () => {
       const req = {
         body: {
-          email: 'ThisIsATest@test.com',
-          password: mockPassword,
+          email: null,
+          password: null,
         },
       } as unknown as Request;
-      (repoMock.search as jest.Mock).mockReturnValue([]);
+      (repoMock.search as jest.Mock).mockReturnValue(null);
       await controller.login(req, resp, next);
       expect(next).toHaveBeenCalled();
       expect(HTTPError).toThrowError();
