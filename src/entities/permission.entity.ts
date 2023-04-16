@@ -1,7 +1,7 @@
 export type Permission = {
   id: string;
   userEmail: string;
-  collection: string;
+  collectionName: string;
   permission: string;
   active: boolean;
 };
