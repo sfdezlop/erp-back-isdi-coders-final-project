@@ -1,11 +1,20 @@
 import createDebug from 'debug';
 import { Permission } from '../entities/permission.entity';
-// Import { HTTPError } from '../interfaces/error.js';
 import { PermissionModel } from './permissions.mongo.model.js';
 const debug = createDebug('ERP:repo:permissions');
 
 export class PermissionsMongoRepo {
-  constructor() {
+  private static instance: PermissionsMongoRepo;
+
+  public static getInstance(): PermissionsMongoRepo {
+    if (!PermissionsMongoRepo.instance) {
+      PermissionsMongoRepo.instance = new PermissionsMongoRepo();
+    }
+
+    return PermissionsMongoRepo.instance;
+  }
+
+  private constructor() {
     debug('Instantiated at constructor');
   }
 
