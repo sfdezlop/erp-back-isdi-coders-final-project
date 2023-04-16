@@ -1,11 +1,9 @@
 import { Response, Request, NextFunction } from 'express';
 import createDebug from 'debug';
 import { User } from '../entities/user.entity';
-// Import { Permission } from '../entities/permission.entity';
 import { Repo } from '../repositories/repo.interface';
 import { HTTPError } from '../interfaces/error.js';
 import { Auth, PayloadToken } from '../services/auth.js';
-// Import { PermissionsMongoRepo } from '../repositories/permissions.mongo.repo.js';
 const debug = createDebug('ERP:controller:users');
 export class UsersController {
   constructor(public repo: Repo<User>) {
@@ -48,19 +46,6 @@ export class UsersController {
 
       const token = Auth.createJWT(payload);
       const dataUsers = await this.repo.query();
-
-      // Const permissionsRepo = new PermissionsMongoRepo();
-      // if (!dataUser[0].email)
-      //   throw new HTTPError(
-      //     401,
-      //     'Not permissions found for this email',
-      //     'Not permissions found for this email'
-      //   );
-
-      // const dataPermissions = await permissionsRepo.search({
-      //   key: 'userEmail',
-      //   value: dataUser[0].email,
-      // });
 
       resp.status(202);
 
@@ -113,11 +98,11 @@ export class UsersController {
     }
   }
 
-  async countRecords(_req: Request, resp: Response, next: NextFunction) {
+  async countRecords(req: Request, resp: Response, next: NextFunction) {
     try {
       debug('count:get');
       const data = await this.repo.countRecords();
-      resp.status(700);
+      resp.status(200);
       resp.json({
         count: [data],
       });
