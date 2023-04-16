@@ -1,7 +1,6 @@
 import { ProductMovementsController } from './productmovements.controller';
 import { Request, Response, NextFunction } from 'express';
 import { ProductMovementMongoRepo } from '../repositories/productmovements.mongo.repo';
-import { HTTPError } from '../interfaces/error';
 
 describe('Given the productmovements controller', () => {
   const repoMock = {
