@@ -1,7 +1,6 @@
 import { ProductsController } from './products.controller';
 import { Request, Response, NextFunction } from 'express';
 import { ProductsMongoRepo } from '../repositories/products.mongo.repo';
-import { error } from 'console';
 import { HTTPError } from '../interfaces/error';
 
 describe('Given the product controller', () => {
