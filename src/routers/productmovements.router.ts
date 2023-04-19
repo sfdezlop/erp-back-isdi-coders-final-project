@@ -32,6 +32,27 @@ productMovementsRouter.post(
   controller.getByFilterWithPaginationAndOrder.bind(controller)
 );
 
+productMovementsRouter.post(
+  '/add',
+  logged,
+
+  controller.create.bind(controller)
+);
+
+productMovementsRouter.get(
+  '/stock',
+  logged,
+
+  controller.stock.bind(controller)
+);
+
+productMovementsRouter.get(
+  '/stock/:id',
+  logged,
+
+  controller.stockBySku.bind(controller)
+);
+
 productMovementsRouter.get(
   '/:id',
   logged,

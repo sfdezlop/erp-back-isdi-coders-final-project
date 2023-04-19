@@ -34,6 +34,18 @@ export class ProductMovementMongoRepo {
     return data;
   }
 
+  async create(info: Partial<ProductMovement>): Promise<ProductMovement> {
+    debug('Instantiated at constructor at create method');
+    const data = await ProductMovementModel.create(info);
+    if (!data)
+      throw new HTTPError(
+        404,
+        'Not possible to create a new record',
+        'Not possible to create a new record'
+      );
+    return data;
+  }
+
   async destroy(id: string): Promise<void> {
     debug(id);
     const data = await ProductMovementModel.findByIdAndDelete(id);
@@ -156,11 +168,23 @@ export class ProductMovementMongoRepo {
         },
       ]);
 
+    const dataActualStock = await ProductMovementModel.aggregate([
+      {
+        $group: {
+          _id: '$productSku',
+          stock: {
+            $sum: '$units',
+          },
+        },
+      },
+    ]);
+
     return [
       {
         ActualInventoryCost: dataActualInventoryCost,
         AnnualInventoryCostVariation: dataAnnualInventoryCostVariation,
         MonthlyInventoryCostVariation: dataMonthlyInventoryCostVariation,
+        ActualStock: dataActualStock,
       },
     ];
   }
@@ -203,6 +227,52 @@ export class ProductMovementMongoRepo {
     const data = await ProductMovementModel.find({
       [query.filterField]: query.filterValue,
     }).countDocuments();
+    return data;
+  }
+
+  async stockBySku(sku: string): Promise<object[]> {
+    debug('Instantiated at constructor at stockBySku method');
+    const data = await ProductMovementModel.aggregate([
+      {
+        $group: {
+          _id: '$productSku',
+          stock: {
+            $sum: '$units',
+          },
+        },
+      },
+      { $match: { _id: sku } },
+    ]);
+
+    if (!data)
+      throw new HTTPError(
+        444,
+        'sku not found in stockBySku',
+        'sku not found in stockBySku'
+      );
+    // Debug(data[0].stock);
+    return data;
+  }
+
+  async stock(): Promise<object[]> {
+    debug('Instantiated at constructor at stockBySku method');
+    const data = await ProductMovementModel.aggregate([
+      {
+        $group: {
+          _id: '$productSku',
+          stock: {
+            $sum: '$units',
+          },
+        },
+      },
+    ]);
+
+    if (!data)
+      throw new HTTPError(
+        445,
+        'collection or field not found',
+        'collection or field not found'
+      );
     return data;
   }
 }
