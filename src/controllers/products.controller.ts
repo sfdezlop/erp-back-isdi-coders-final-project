@@ -56,7 +56,9 @@ export class ProductsController {
   async create(req: Request, resp: Response, next: NextFunction) {
     try {
       debug('create:post');
+      if (!req.body) throw new HTTPError(404, 'Body needed', 'Body needed');
       const data = await this.repo.create(req.body);
+
       resp.status(201);
       resp.json({
         results: [data],
