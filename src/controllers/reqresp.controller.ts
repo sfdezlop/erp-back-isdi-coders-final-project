@@ -2,7 +2,7 @@ import { Response, Request, NextFunction } from 'express';
 import createDebug from 'debug';
 import { ReqRespMongoRepo } from '../repositories/reqresp.mongo.repo';
 import morgan from 'morgan';
-const debug = createDebug('ERP:controller:users');
+const debug = createDebug('ERP:controller:reqresp');
 
 export class ReqRespController {
   constructor(public repo: ReqRespMongoRepo) {
