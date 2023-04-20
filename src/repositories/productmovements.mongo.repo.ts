@@ -25,6 +25,19 @@ export class ProductMovementMongoRepo {
     return data;
   }
 
+  async queryId(id: string): Promise<ProductMovement> {
+    debug('queryId method');
+    const data = await ProductMovementModel.findById(id).exec();
+    debug('query id');
+    if (!data)
+      throw new HTTPError(
+        444,
+        'Id not found in queryId',
+        'Id not found in queryId'
+      );
+    return data;
+  }
+
   async search(query: {
     key: string;
     value: unknown;
@@ -206,19 +219,6 @@ export class ProductMovementMongoRepo {
     return data;
   }
 
-  async queryId(id: string): Promise<ProductMovement> {
-    debug('queryId method');
-    const data = await ProductMovementModel.findById(id).exec();
-    debug('query id');
-    if (!data)
-      throw new HTTPError(
-        444,
-        'Id not found in queryId',
-        'Id not found in queryId'
-      );
-    return data;
-  }
-
   async countFilteredRecords(query: {
     filterField: string;
     filterValue: string;
@@ -258,12 +258,11 @@ export class ProductMovementMongoRepo {
         'sku not found in stockBySku',
         'sku not found in stockBySku'
       );
-    // Debug(data[0].stock);
     return data;
   }
 
   async stock(): Promise<object[]> {
-    debug('stockBySku method');
+    debug('stock method');
     const data = await ProductMovementModel.aggregate([
       {
         $group: {
