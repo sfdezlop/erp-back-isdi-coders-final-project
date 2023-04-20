@@ -20,8 +20,21 @@ export class ProductMovementMongoRepo {
   }
 
   async query(): Promise<ProductMovement[]> {
-    debug('Instantiated at constructor at query method');
-    const data = await ProductMovementModel.find();
+    debug('query method');
+    const data = await ProductMovementModel.find().exec();
+    return data;
+  }
+
+  async queryId(id: string): Promise<ProductMovement> {
+    debug('queryId method');
+    const data = await ProductMovementModel.findById(id).exec();
+    debug('query id');
+    if (!data)
+      throw new HTTPError(
+        444,
+        'Id not found in queryId',
+        'Id not found in queryId'
+      );
     return data;
   }
 
@@ -29,30 +42,34 @@ export class ProductMovementMongoRepo {
     key: string;
     value: unknown;
   }): Promise<ProductMovement[]> {
-    debug('Instantiated at constructor at search method');
-    const data = await ProductMovementModel.find({ [query.key]: query.value });
+    debug('search method');
+    const data = await ProductMovementModel.find({
+      [query.key]: query.value,
+    }).exec();
     return data;
   }
 
-  async destroy(id: string): Promise<void> {
-    debug(id);
-    const data = await ProductMovementModel.findByIdAndDelete(id);
+  async create(info: Partial<ProductMovement>): Promise<ProductMovement> {
+    debug('create method');
+    const data = await ProductMovementModel.create(info);
+    return data;
+  }
+
+  async destroy(id: string): Promise<ProductMovement> {
+    debug('destroy method');
+    const data = await ProductMovementModel.findByIdAndDelete(id).exec();
     if (!data)
       throw new HTTPError(
         404,
         'Not found',
         'Delete not possible: id not found'
       );
-  }
 
-  async countRecords(): Promise<number> {
-    debug('Instantiated at constructor at count method');
-    const data = await ProductMovementModel.countDocuments();
     return data;
   }
 
   async analytics(): Promise<object> {
-    debug('Instantiated at constructor at analytics method');
+    debug('analytics method');
 
     const dataActualInventoryCost = await ProductMovementModel.aggregate([
       {
@@ -77,7 +94,7 @@ export class ProductMovementMongoRepo {
           },
         },
       },
-    ]);
+    ]).exec();
 
     const dataAnnualInventoryCostVariation =
       await ProductMovementModel.aggregate([
@@ -111,7 +128,7 @@ export class ProductMovementMongoRepo {
             yearOfDate: 1,
           },
         },
-      ]);
+      ]).exec();
 
     const dataMonthlyInventoryCostVariation =
       await ProductMovementModel.aggregate([
@@ -154,13 +171,32 @@ export class ProductMovementMongoRepo {
             yearMonthOfDate: 1,
           },
         },
-      ]);
+      ]).exec();
 
+    const dataActualStock = await ProductMovementModel.aggregate([
+      {
+        $group: {
+          _id: '$productSku',
+          stock: {
+            $sum: '$units',
+          },
+        },
+      },
+    ]).exec();
+
+    if (
+      !dataActualInventoryCost ||
+      !dataAnnualInventoryCostVariation ||
+      !dataMonthlyInventoryCostVariation ||
+      !dataActualStock
+    )
+      throw new HTTPError(404, 'Not found', 'Analytics Not found');
     return [
       {
         ActualInventoryCost: dataActualInventoryCost,
         AnnualInventoryCostVariation: dataAnnualInventoryCostVariation,
         MonthlyInventoryCostVariation: dataMonthlyInventoryCostVariation,
+        ActualStock: dataActualStock,
       },
     ];
   }
@@ -172,26 +208,14 @@ export class ProductMovementMongoRepo {
     filterRecordsPerSet: number;
     orderField: string;
   }): Promise<ProductMovement[]> {
-    debug('Instantiated at constructor at getByFilterWithPagination method');
+    debug('getByFilterWithPagination method');
     const data = await ProductMovementModel.find({
       [filter.filterField]: filter.filterValue,
     })
       .skip((filter.filterSet - 1) * filter.filterRecordsPerSet)
       .limit(filter.filterRecordsPerSet)
-      .sort(filter.orderField);
-    return data;
-  }
-
-  async queryId(id: string): Promise<ProductMovement> {
-    debug('Instantiated at constructor at queryId method');
-    const data = await ProductMovementModel.findById(id);
-    debug('query id');
-    if (!data)
-      throw new HTTPError(
-        444,
-        'Id not found in queryId',
-        'Id not found in queryId'
-      );
+      .sort(filter.orderField)
+      .exec();
     return data;
   }
 
@@ -199,10 +223,63 @@ export class ProductMovementMongoRepo {
     filterField: string;
     filterValue: string;
   }): Promise<number> {
-    debug('Instantiated at constructor at count method');
+    debug('countFilteredRecords method');
     const data = await ProductMovementModel.find({
       [query.filterField]: query.filterValue,
-    }).countDocuments();
+    })
+      .countDocuments()
+      .exec();
+    return data;
+  }
+
+  async countRecords(): Promise<number> {
+    debug('countRecords method');
+    const data = await ProductMovementModel.countDocuments().exec();
+    return data;
+  }
+
+  async stockBySku(sku: string): Promise<object[]> {
+    debug('stockBySku method');
+    const data = await ProductMovementModel.aggregate([
+      {
+        $group: {
+          _id: '$productSku',
+          stock: {
+            $sum: '$units',
+          },
+        },
+      },
+      { $match: { _id: sku } },
+    ]).exec();
+
+    if (!data)
+      throw new HTTPError(
+        444,
+        'sku not found in stockBySku',
+        'sku not found in stockBySku'
+      );
+    return data;
+  }
+
+  async stock(): Promise<object[]> {
+    debug('stock method');
+    const data = await ProductMovementModel.aggregate([
+      {
+        $group: {
+          _id: '$productSku',
+          stock: {
+            $sum: '$units',
+          },
+        },
+      },
+    ]).exec();
+
+    if (!data)
+      throw new HTTPError(
+        445,
+        'collection or field not found',
+        'collection or field not found'
+      );
     return data;
   }
 }
