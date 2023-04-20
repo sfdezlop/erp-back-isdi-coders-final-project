@@ -1,16 +1,13 @@
 export {};
 // Import { Response, Request, NextFunction } from 'express';
 // import createDebug from 'debug';
-
 // import { HTTPError } from '../interfaces/error.js';
 // import { MongoRepo } from './mongo.repo.js';
-
 // const debug = createDebug('ERP:controller:users');
 // export class Controller {
 //   constructor(public repo: MongoRepo) {
 //     debug('Instantiate');
 //   }
-
 //   async getByFilterWithPagination(
 //     _req: Request,
 //     resp: Response,

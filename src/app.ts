@@ -1,4 +1,5 @@
 // Import path from 'path';
+// Import { __dirname } from './config.js';
 import express, { NextFunction, Request, Response } from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
@@ -7,10 +8,9 @@ import createDebug from 'debug';
 import { CustomError } from './interfaces/error.js';
 import { productsRouter } from './routers/products.router.js';
 import { productMovementsRouter } from './routers/productmovements.router.js';
-import { ReqRespController } from './controllers/reqresp.controller.js';
-import { ReqRespMongoRepo } from './repositories/reqresp.mongo.repo.js';
+
 import { reqRespRouter } from './routers/reqresp.router.js';
-// Import { __dirname } from './config.js';
+
 const debug = createDebug('ERP:app');
 export const app = express();
 
@@ -22,13 +22,12 @@ const corsOptions = {
 
 app.use(morgan('dev'), reqRespRouter);
 
-// App.use(reqRespRouter);
-
 app.use(express.json());
 app.use(cors(corsOptions));
 
-// Debug({ __dirname });
-// App.use(express.static(path.resolve(__dirname, 'public')));
+// Code to be implemented for statics content
+// debug({ __dirname });
+// app.use(express.static(path.resolve(__dirname, 'public')));
 app.use('/productmovements', productMovementsRouter);
 app.use('/users', usersRouter);
 app.use('/products', productsRouter);

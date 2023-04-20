@@ -37,5 +37,4 @@ productsRouter.post(
 productsRouter.post('/', logged, controller.create.bind(controller));
 productsRouter.get('/:path/:id', logged, controller.getByKey.bind(controller));
 productsRouter.get('/:id', logged, controller.getById.bind(controller));
-// ProductsRouter.delete('/:path/:id', controller.deleteByKey.bind(controller));
 productsRouter.delete('/:id', logged, controller.delete.bind(controller));

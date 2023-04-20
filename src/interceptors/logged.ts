@@ -10,7 +10,6 @@ export interface RequestPlus extends Request {
 export function logged(req: RequestPlus, resp: Response, next: NextFunction) {
   try {
     debug('Called');
-    // Debug(req.get('Authorization'));
     const authHeader = req.get('Authorization');
     if (!authHeader)
       throw new HTTPError(498, 'Token invalid', 'Not value in auth header');

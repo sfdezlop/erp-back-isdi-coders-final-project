@@ -1,5 +1,4 @@
 import createDebug from 'debug';
-import { Repo } from './repo.interface';
 import { ReqRespModel } from './reqresp.mongo.model.js';
 import { ReqResp } from '../entities/reqresp.entity';
 
