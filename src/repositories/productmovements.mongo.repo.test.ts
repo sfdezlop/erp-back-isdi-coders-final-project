@@ -154,8 +154,7 @@ describe('Given a new ProductMovementMongoRepo created with a public static func
   });
 });
 
-// Pending test:
-
+// PENDING TESTS WITH ERRORS:
 // describe('When we use the getByFilterWithPaginationAndOrder method', () => {
 //   test('Then the mongoose find method is called', async () => {
 //     const mockSkipFunction = (mockValue: number) => ({
@@ -163,13 +162,11 @@ describe('Given a new ProductMovementMongoRepo created with a public static func
 //         exec: jest.fn().mockResolvedValue(mockValue),
 //       })),
 //     });
-
 //     const mockLimitFunction = (mockValue: number) => ({
 //       limit: jest.fn().mockImplementation(() => ({
 //         exec: jest.fn().mockResolvedValue(mockValue),
 //       })),
 //     });
-
 //     const mockSortFunction = (mockValue: string) => ({
 //       sort: jest.fn().mockImplementation(() => ({
 //         exec: jest.fn().mockResolvedValue(mockValue),
@@ -178,7 +175,6 @@ describe('Given a new ProductMovementMongoRepo created with a public static func
 //     (ProductMovementModel.find as jest.Mock).mockImplementation(() =>
 //       mockSkipFunction(1)
 //     );
-
 //     await instanceOfProductMovementsMongoRepo.getByFilterWithPaginationAndOrder(
 //       {
 //         filterField: 'field',
@@ -189,7 +185,6 @@ describe('Given a new ProductMovementMongoRepo created with a public static func
 //       }
 //     );
 //     mongoose.disconnect();
-
 //     expect(
 //       ProductMovementModel.find().skip(1).limit(1).sort()
 //     ).toHaveBeenCalled();
