@@ -1,12 +1,9 @@
 export {};
-// /* eslint-disable max-params */
-// import createDebug from 'debug';
+// Import createDebug from 'debug';
 // import { userSchema } from '../repositories/users.mongo.model.js';
 // import { model } from 'mongoose';
-
 // const debug = createDebug('ERP:superepo:users');
 // export type MongoCollectionType = typeof model;
-
 // export class MongoRepo {
 //   collection;
 //   filterKey;
@@ -20,7 +17,6 @@ export {};
 //   groupByKey?;
 //   orderByKey?;
 //   orderType?;
-
 //   constructor(
 //     collection: MongoCollectionType,
 //     filterKey: string,
@@ -36,7 +32,6 @@ export {};
 //     orderType: 'ASC' | 'DESC' | null
 //   ) {
 //     debug('Instantiated at constructor');
-
 //     this.collection = collection;
 //     this.filterKey = filterKey;
 //     this.filterStringValue = filterStringValue;
@@ -50,7 +45,6 @@ export {};
 //     this.orderByKey = orderByKey;
 //     this.orderType = orderType;
 //   }
-
 //   async getByFilterWithPagination(): Promise<unknown> {
 //     debug('Instantiated at constructor at query method');
 //     const data = await this.collection(
@@ -61,7 +55,6 @@ export {};
 //       .find({ [this.filterKey]: this.filterStringValue })
 //       .skip((this.filterSet - 1) * this.filterRecordsPerSet)
 //       .limit(this.filterRecordsPerSet);
-
 //     return data;
 //   }
 // }

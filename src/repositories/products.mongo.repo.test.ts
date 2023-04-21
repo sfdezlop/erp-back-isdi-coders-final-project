@@ -1,6 +1,7 @@
 import { ProductsMongoRepo } from './products.mongo.repo.js';
 import { ProductModel } from './products.mongo.model';
 import mongoose from 'mongoose';
+import { HTTPError } from '../interfaces/error.js';
 
 jest.mock('./products.mongo.model.js');
 
@@ -20,6 +21,27 @@ describe('Given a new ProductsMongoRepo created with a public static function (t
       mongoose.disconnect();
       expect(ProductModel.findById).toHaveBeenCalled();
       expect(result).toBe(mock);
+    });
+  });
+
+  describe('When we use the leftJoinProductMovements', () => {
+    test('Then the aggregate mongoose method should be called', async () => {
+      (ProductModel.aggregate as jest.Mock).mockResolvedValue([]);
+      await instanceOfProductsMongoRepo.leftJoinProductMovements();
+      mongoose.disconnect();
+      expect(ProductModel.aggregate).toHaveBeenCalled();
+    });
+  });
+
+  describe('When we use the queryByKey', () => {
+    test('Then the find mongoose method should be called', async () => {
+      (ProductModel.find as jest.Mock).mockResolvedValue([]);
+      await instanceOfProductsMongoRepo.queryByKey({
+        key: 'mock',
+        value: 'mock',
+      });
+      mongoose.disconnect();
+      expect(ProductModel.find).toHaveBeenCalled();
     });
   });
 
@@ -76,48 +98,23 @@ describe('Given a new ProductsMongoRepo created with a public static function (t
   });
 
   describe('When we use the deleteByKey method to a record that does not exists ', () => {
-    test('Then it should throw an error of Record not found', async () => {
-      (ProductModel.findByIdAndUpdate as jest.Mock).mockResolvedValue(
+    test('Then it should throw an error of key and value not found', async () => {
+      (ProductModel.findByIdAndDelete as jest.Mock).mockResolvedValue(
         undefined
       );
-      await instanceOfProductsMongoRepo.deleteByKey('deleteKey', 'deleteValue');
+      expect(() =>
+        instanceOfProductsMongoRepo.deleteByKey('', '')
+      ).rejects.toThrow(HTTPError);
       mongoose.disconnect();
-      expect(ProductModel.findByIdAndDelete).toHaveBeenCalled();
+    });
+  });
+
+  describe('When we use the groupValuesPerField', () => {
+    test('Then the aggregate mongoose method should be called', async () => {
+      (ProductModel.aggregate as jest.Mock).mockResolvedValue([]);
+      await instanceOfProductsMongoRepo.groupValuesPerField('mock');
+      mongoose.disconnect();
+      expect(ProductModel.aggregate).toHaveBeenCalled();
     });
   });
 });
-
-// Pending tests with mongoose complex methods
-// Describe('When we use the countFilteredRecords method', () => {
-//   test.only('Then it should throw an error of Record not found (see error code assigned in user.mongo.repo.ts', async () => {
-//     (ProductModel.find().countDocuments as jest.Mock).mockResolvedValue(null);
-//     const mockedFilter = {
-//       filterField: 'id',
-//       filterValue: '2',
-//     };
-//     mongoose.disconnect();
-//     expect(() =>
-//       instanceOfProductsMongoRepo.countFilteredRecords(mockedFilter)
-//     ).rejects.toThrow();
-//     expect(ProductModel.find).toHaveBeenCalled();
-//   });
-// });
-// Pending tests with errors of workers (it works with test.only)
-// Describe('When we use the groupValuesPerField method', () => {
-//   test('Then, if the mocked response is null, an error should be thrown', async () => {
-//     (ProductModel.aggregate as jest.Mock).mockResolvedValue(null);
-//     expect(() =>
-//       instanceOfProductsMongoRepo.groupValuesPerField('mockedField')
-//     ).rejects.toThrow();
-//     mongoose.disconnect();
-//   });
-// });
-// Describe('When we use the update method to a record that does not exists ', () => {
-//   test('Then it should throw an error of Record not found', async () => {
-//     (ProductModel.findByIdAndUpdate as jest.Mock).mockResolvedValue(null);
-//     const mockedInfo = {};
-//     await instanceOfProductsMongoRepo.update(mockedInfo);
-//     mongoose.disconnect();
-//     expect(ProductModel.findByIdAndUpdate).toHaveBeenCalled();
-//   });
-// });

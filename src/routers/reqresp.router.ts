@@ -11,5 +11,4 @@ debug('loaded');
 const repo = ReqRespMongoRepo.getInstance();
 const controller = new ReqRespController(repo);
 
-// ReqRespRouter.all('/*', controller.create.bind(controller));
 controller.create.bind(controller);

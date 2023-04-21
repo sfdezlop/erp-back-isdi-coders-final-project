@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import { ProductMovementMongoRepo } from '../repositories/productmovements.mongo.repo';
 import { HTTPError } from '../interfaces/error';
 
-describe('Given a productmovements controller', () => {
+describe('Given the productmovements controller', () => {
   const repoMockWithResp = {
     analytics: jest.fn().mockReturnValue({ results: [] }),
     create: jest.fn(),
