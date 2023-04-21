@@ -2,7 +2,7 @@ import createDebug from 'debug';
 import { ReqRespModel } from './reqresp.mongo.model.js';
 import { ReqResp } from '../entities/reqresp.entity';
 
-const debug = createDebug('ERP:repo:users');
+const debug = createDebug('ERP:repo:reqresp');
 
 export class ReqRespMongoRepo {
   private static instance: ReqRespMongoRepo;
