@@ -13,6 +13,7 @@ describe('Given the productmovements controller', () => {
     countRecords: jest.fn(),
     stockBySku: jest.fn(),
     stock: jest.fn(),
+    groupValuesPerField: jest.fn(),
   } as unknown as ProductMovementMongoRepo;
 
   const repoMockWithoutResp = {
@@ -24,6 +25,7 @@ describe('Given the productmovements controller', () => {
     countRecords: jest.fn(),
     stockBySku: jest.fn(),
     stock: jest.fn(),
+    groupValuesPerField: jest.fn(),
   } as unknown as ProductMovementMongoRepo;
 
   const controllerWithResp = new ProductMovementsController(repoMockWithResp);
@@ -406,6 +408,45 @@ describe('Given the productmovements controller', () => {
         next
       );
       expect(repoMockWithResp.stock).toHaveBeenCalled();
+      expect(mockResp.json).toHaveBeenCalled();
+      expect(mockResp.status).toHaveBeenCalled();
+    });
+  });
+
+  describe('When the groupValuesPerField method is called', () => {
+    test('Then, if authorization is not included in the request, it should throw an error', async () => {
+      await controllerWithoutResp.groupValuesPerField(
+        mockReqWithoutAuthorization,
+        mockResp,
+        next
+      );
+      expect(HTTPError).toThrowError();
+    });
+    test('Then, if a Bearer formed authorization is not included in the request, it should throw an error', async () => {
+      await controllerWithoutResp.groupValuesPerField(
+        mockReqWithoutBearerFormedAuthorization,
+        mockResp,
+        next
+      );
+      expect(HTTPError).toThrowError();
+    });
+
+    test('Then, if a Bearer formed authorization is included in the request, an error should be thrown when no data is received', async () => {
+      await controllerWithoutResp.groupValuesPerField(
+        mockReqWithBearerFormedAuthorization,
+        mockResp,
+        next
+      );
+      expect(HTTPError).toThrowError();
+    });
+    test('Then, if a Bearer formed authorization is included in the request, the groupValuesPerField method of the repo should have been called and a json respond and its status should be send when data is received', async () => {
+      await controllerWithResp.groupValuesPerField(
+        mockReqWithBearerFormedAuthorization,
+        mockResp,
+        next
+      );
+
+      expect(repoMockWithResp.groupValuesPerField).toHaveBeenCalled();
       expect(mockResp.json).toHaveBeenCalled();
       expect(mockResp.status).toHaveBeenCalled();
     });

@@ -152,58 +152,18 @@ describe('Given a new ProductMovementMongoRepo created with a public static func
       expect(result).toEqual(mockResult);
     });
   });
-});
 
-// PENDING TESTS WITH ERRORS:
-// describe('When we use the getByFilterWithPaginationAndOrder method', () => {
-//   test('Then the mongoose find method is called', async () => {
-//     const mockSkipFunction = (mockValue: number) => ({
-//       skip: jest.fn().mockImplementation(() => ({
-//         exec: jest.fn().mockResolvedValue(mockValue),
-//       })),
-//     });
-//     const mockLimitFunction = (mockValue: number) => ({
-//       limit: jest.fn().mockImplementation(() => ({
-//         exec: jest.fn().mockResolvedValue(mockValue),
-//       })),
-//     });
-//     const mockSortFunction = (mockValue: string) => ({
-//       sort: jest.fn().mockImplementation(() => ({
-//         exec: jest.fn().mockResolvedValue(mockValue),
-//       })),
-//     });
-//     (ProductMovementModel.find as jest.Mock).mockImplementation(() =>
-//       mockSkipFunction(1)
-//     );
-//     await instanceOfProductMovementsMongoRepo.getByFilterWithPaginationAndOrder(
-//       {
-//         filterField: 'field',
-//         filterValue: 'value',
-//         filterSet: 1,
-//         filterRecordsPerSet: 1,
-//         orderField: 'field',
-//       }
-//     );
-//     mongoose.disconnect();
-//     expect(
-//       ProductMovementModel.find().skip(1).limit(1).sort()
-//     ).toHaveBeenCalled();
-//   });
-// });
-// describe('When we call the countFilteredRecords method', () => {
-//   test('Then the mongoose countDocuments method is called an it should return the mocked value', async () => {
-//     const mockResult = 1;
-//     const query = {
-//       filterField: 'field',
-//       filterValue: 'value',
-//     };
-//     (ProductMovementModel.countDocuments as jest.Mock).mockImplementation(
-//       () => mockExecFunction(mockResult)
-//     );
-//     const result =
-//       await instanceOfProductMovementsMongoRepo.countFilteredRecords(query);
-//     mongoose.disconnect();
-//     expect(ProductMovementModel.countDocuments).toHaveBeenCalled();
-//     expect(result).toEqual(mockResult);
-//   });
-// });
+  describe('When we call the groupValuesPerField method', () => {
+    test('Then the mongoose aggregate is called an it should return the mocked record', async () => {
+      const mockResult = [{ id: 1 }];
+      (ProductMovementModel.aggregate as jest.Mock).mockImplementation(() =>
+        mockExecFunction(mockResult)
+      );
+      await instanceOfProductMovementsMongoRepo.groupValuesPerField(
+        'mockField'
+      );
+      mongoose.disconnect();
+      expect(ProductMovementModel.aggregate).toHaveBeenCalled();
+    });
+  });
+});
