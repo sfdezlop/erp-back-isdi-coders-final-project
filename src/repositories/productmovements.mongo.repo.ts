@@ -225,13 +225,11 @@ export class ProductMovementMongoRepo {
     filterValue: string;
   }): Promise<number> {
     debug('countFilteredRecords method');
-    debug(query);
     const data = await ProductMovementModel.find({
       [query.filterField]: query.filterValue,
     })
       .countDocuments()
       .exec();
-    debug(data);
     return data;
   }
 

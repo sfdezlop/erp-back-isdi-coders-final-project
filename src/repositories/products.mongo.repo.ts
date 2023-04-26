@@ -121,11 +121,9 @@ export class ProductsMongoRepo {
     filterValue: string;
   }): Promise<number> {
     debug('Instantiated at constructor at countFilteredRecords method');
-    debug(query);
     const data = await ProductModel.find({
       [query.filterField]: query.filterValue,
     }).countDocuments();
-    debug(data);
     return data;
   }
 
