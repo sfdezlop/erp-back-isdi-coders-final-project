@@ -25,6 +25,7 @@ export class ProductsMongoRepo {
     filterSet: number;
     filterRecordsPerSet: number;
     orderField: string;
+    orderType: 'asc' | 'desc';
   }): Promise<Product[]> {
     debug('Instantiated at constructor at getByFilterWithPagination method');
     const data = await ProductModel.find({
@@ -32,7 +33,7 @@ export class ProductsMongoRepo {
     })
       .skip((filter.filterSet - 1) * filter.filterRecordsPerSet)
       .limit(filter.filterRecordsPerSet)
-      .sort(filter.orderField);
+      .sort([[filter.orderField, filter.orderType ? filter.orderType : 'asc']]);
 
     return data;
   }
@@ -119,10 +120,12 @@ export class ProductsMongoRepo {
     filterField: string;
     filterValue: string;
   }): Promise<number> {
-    debug('Instantiated at constructor at count method');
+    debug('Instantiated at constructor at countFilteredRecords method');
+    debug(query);
     const data = await ProductModel.find({
       [query.filterField]: query.filterValue,
     }).countDocuments();
+    debug(data);
     return data;
   }
 
@@ -139,10 +142,12 @@ export class ProductsMongoRepo {
       },
     ]);
 
-    if (!data)
-      throw new HTTPError(404, 'Not found', 'Id not found in stockById');
+    if (!data) throw new HTTPError(404, 'Not found', 'Not found');
 
-    const dataMap = data.map((item: any) => item.value, 'brand');
+    const dataMap = data.map(
+      (item: { _id: string; value: string }) => item.value,
+      'brand'
+    );
 
     return dataMap;
   }

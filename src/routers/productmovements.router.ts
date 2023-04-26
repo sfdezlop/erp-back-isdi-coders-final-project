@@ -19,6 +19,12 @@ productMovementsRouter.post(
   controller.countFilteredRecords.bind(controller)
 );
 
+productMovementsRouter.post(
+  '/group-values-per-field/:id',
+  logged,
+  controller.groupValuesPerField.bind(controller)
+);
+
 productMovementsRouter.get(
   '/analytics',
   logged,

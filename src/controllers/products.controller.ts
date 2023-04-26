@@ -144,8 +144,9 @@ export class ProductsController {
 
   async groupValuesPerField(req: Request, resp: Response, next: NextFunction) {
     try {
-      const brandToGroup = req.params.id;
-      const data = await this.repo.groupValuesPerField(brandToGroup);
+      const fieldToGroup = req.params.id;
+      const data = await this.repo.groupValuesPerField(fieldToGroup);
+      resp.status(200);
       resp.json({
         results: data,
       });

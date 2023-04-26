@@ -261,4 +261,17 @@ export class ProductMovementsController {
       next(error);
     }
   }
+
+  async groupValuesPerField(req: Request, resp: Response, next: NextFunction) {
+    try {
+      const fieldToGroup = req.params.id;
+      const data = await this.repo.groupValuesPerField(fieldToGroup);
+      resp.status(200);
+      resp.json({
+        results: data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
