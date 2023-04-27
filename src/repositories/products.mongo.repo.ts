@@ -93,7 +93,7 @@ export class ProductsMongoRepo {
     return data;
   }
 
-  async destroy(id: string): Promise<void> {
+  async deleteById(id: string): Promise<void> {
     debug(id);
     const data = await ProductModel.findByIdAndDelete(id);
     if (!data)

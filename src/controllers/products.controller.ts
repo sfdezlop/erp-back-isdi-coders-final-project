@@ -88,11 +88,11 @@ export class ProductsController {
     }
   }
 
-  async delete(req: Request, resp: Response, next: NextFunction) {
+  async deleteById(req: Request, resp: Response, next: NextFunction) {
     try {
-      debug('delete-method');
+      debug('deleteById-method');
       const deleteId = req.params.id;
-      const data = await this.repo.destroy(deleteId);
+      const data = await this.repo.deleteById(deleteId);
       resp.json({
         results: data,
       });

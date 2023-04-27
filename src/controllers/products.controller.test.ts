@@ -10,7 +10,7 @@ describe('Given the product controller', () => {
     queryByKey: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
-    destroy: jest.fn(),
+    deleteById: jest.fn(),
     deleteByKey: jest.fn(),
     countFilteredRecords: jest.fn(),
     leftJoinProductMovements: jest.fn(),
@@ -117,14 +117,14 @@ describe('Given the product controller', () => {
     });
   });
 
-  describe('When the delete method is called', () => {
+  describe('When the deleteById method is called', () => {
     test('Then, if everything is correct, the response should have results', async () => {
-      await controller.delete(req, resp, next);
+      await controller.deleteById(req, resp, next);
       expect(resp.json).toHaveBeenCalled();
     });
     test('Then, if there is not a correct body at the request, it should call next', async () => {
       const req = null as unknown as Request;
-      await controller.delete(req, resp, next);
+      await controller.deleteById(req, resp, next);
       expect(next).toHaveBeenCalled();
     });
   });

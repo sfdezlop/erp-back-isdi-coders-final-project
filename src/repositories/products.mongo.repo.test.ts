@@ -76,21 +76,21 @@ describe('Given a new ProductsMongoRepo created with a public static function (t
     });
   });
 
-  describe('When we use the destroy method ', () => {
+  describe('When we use the deleteById method ', () => {
     test('Then the mongoose method findByIdAndDelete is called', async () => {
       (ProductModel.findByIdAndDelete as jest.Mock).mockResolvedValue(1);
       const mockUserId = '1';
-      await instanceOfProductsMongoRepo.destroy(mockUserId);
+      await instanceOfProductsMongoRepo.deleteById(mockUserId);
       mongoose.disconnect();
       expect(ProductModel.findByIdAndDelete).toHaveBeenCalled();
     });
   });
 
-  describe('When we use the destroy method to a record that exists', () => {
+  describe('When we use the deleteById method to a record that exists', () => {
     test('Then it should delete the record', async () => {
       (ProductModel.findByIdAndDelete as jest.Mock).mockResolvedValue({});
       const mockUserId = '2';
-      const result = await instanceOfProductsMongoRepo.destroy(mockUserId);
+      const result = await instanceOfProductsMongoRepo.deleteById(mockUserId);
       mongoose.disconnect();
       expect(ProductModel.findByIdAndDelete).toHaveBeenCalled();
       expect(result).toEqual(undefined);
