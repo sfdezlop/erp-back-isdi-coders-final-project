@@ -67,6 +67,11 @@ productMovementsRouter.get(
 );
 
 productMovementsRouter.delete(
+  '/:path/:id',
+  logged,
+  controller.deleteByKey.bind(controller)
+);
+productMovementsRouter.delete(
   '/:id',
   logged,
 

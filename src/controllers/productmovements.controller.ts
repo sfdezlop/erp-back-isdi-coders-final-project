@@ -150,6 +150,20 @@ export class ProductMovementsController {
     }
   }
 
+  async deleteByKey(req: Request, resp: Response, next: NextFunction) {
+    try {
+      debug('deleteByKey-method');
+      const deleteKey = req.params.path;
+      const deleteId = req.params.id;
+      const data = await this.repo.deleteByKey(deleteKey, deleteId);
+      resp.json({
+        results: data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async countFilteredRecords(req: Request, resp: Response, next: NextFunction) {
     try {
       debug('countFilteredRecords:post');

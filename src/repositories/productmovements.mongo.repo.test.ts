@@ -105,6 +105,40 @@ describe('Given a new ProductMovementMongoRepo created with a public static func
     });
   });
 
+  describe('When we call the deleteByKey method for a record that does not exist', () => {
+    test('Then the mongoose method findByIdAndDelete is called an it should throw an error of Record not found', async () => {
+      (ProductMovementModel.findByIdAndDelete as jest.Mock).mockResolvedValue(
+        undefined
+      );
+      // Even if the destroy method is using .exec() to transform the mongoose pseudopromise in a promise, the mocked method works
+      mongoose.disconnect();
+
+      expect(() =>
+        instanceOfProductMovementsMongoRepo.deleteByKey('mockKey', 'mockValue')
+      ).rejects.toThrow();
+      expect(ProductMovementModel.findByIdAndDelete).toHaveBeenCalled();
+
+      // When the order of the expects are different, the test does not work
+    });
+  });
+
+  describe('When we call the deleteByKey method for a record that exists', () => {
+    test('Then the mongoose method findByIdAndDelete is called and it should delete the record', async () => {
+      const mockResult = { id: '10' };
+      (ProductMovementModel.findByIdAndDelete as jest.Mock).mockImplementation(
+        () => mockExecFunction(mockResult)
+      );
+      const result = await instanceOfProductMovementsMongoRepo.deleteByKey(
+        'id',
+        '10'
+      );
+      mongoose.disconnect();
+
+      expect(result).toEqual(mockResult);
+      expect(ProductMovementModel.findByIdAndDelete).toHaveBeenCalled();
+    });
+  });
+
   describe('When we use the analytics method', () => {
     test('Then the mongoose aggregate method is called', async () => {
       (ProductMovementModel.aggregate as jest.Mock).mockImplementation(() =>

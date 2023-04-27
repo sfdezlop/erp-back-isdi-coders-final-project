@@ -10,6 +10,7 @@ describe('Given the productmovements controller', () => {
     getByFilterWithPaginationAndOrder: jest.fn(),
     queryId: jest.fn(),
     deleteById: jest.fn(),
+    deleteByKey: jest.fn(),
     countFilteredRecords: jest.fn(),
     countRecords: jest.fn(),
     stockBySku: jest.fn(),
@@ -283,6 +284,54 @@ describe('Given the productmovements controller', () => {
     test('Then, if a Bearer formed authorization is included in the request but a query param is not included in the request, an error should be thrown', async () => {
       mockReqWithBearerFormedAuthorization.params.id = '';
       await controllerWithoutResp.deleteById(
+        mockReqWithBearerFormedAuthorization,
+        mockResp,
+        next
+      );
+      expect(HTTPError).toThrowError();
+    });
+  });
+
+  describe('When the deleteByKey method is called', () => {
+    test('Then, if authorization is not included in the request, it should throw an error', async () => {
+      await controllerWithoutResp.deleteByKey(
+        mockReqWithoutAuthorization,
+        mockResp,
+        next
+      );
+      expect(HTTPError).toThrowError();
+    });
+    test('Then, if a Bearer formed authorization is not included in the request, it should throw an error', async () => {
+      await controllerWithoutResp.deleteByKey(
+        mockReqWithoutBearerFormedAuthorization,
+        mockResp,
+        next
+      );
+      expect(HTTPError).toThrowError();
+    });
+    test('Then, if a Bearer formed authorization and query param are included in the request, an error should be thrown when no data is received', async () => {
+      mockReqWithBearerFormedAuthorization.params.id = 'mockId';
+      await controllerWithoutResp.deleteByKey(
+        mockReqWithBearerFormedAuthorization,
+        mockResp,
+        next
+      );
+      expect(HTTPError).toThrowError();
+    });
+    test('Then, if a Bearer formed authorization and a query param are included in the request, the deleteByKey method of the repo should have been called and a json respond and its status should be send when data is received', async () => {
+      mockReqWithBearerFormedAuthorization.params.id = 'mockId';
+      await controllerWithResp.deleteByKey(
+        mockReqWithBearerFormedAuthorization,
+        mockResp,
+        next
+      );
+      expect(repoMockWithResp.deleteByKey).toHaveBeenCalled();
+      expect(mockResp.json).toHaveBeenCalled();
+      expect(mockResp.status).toHaveBeenCalled();
+    });
+    test('Then, if a Bearer formed authorization is included in the request but a query param is not included in the request, an error should be thrown', async () => {
+      mockReqWithBearerFormedAuthorization.params.id = '';
+      await controllerWithoutResp.deleteByKey(
         mockReqWithBearerFormedAuthorization,
         mockResp,
         next

@@ -68,6 +68,22 @@ export class ProductMovementMongoRepo {
     return data;
   }
 
+  async deleteByKey(
+    deleteKey: string,
+    deleteValue: string
+  ): Promise<ProductMovement> {
+    const data = await ProductMovementModel.findByIdAndDelete({
+      [deleteKey]: deleteValue,
+    }).exec();
+    if (!data)
+      throw new HTTPError(
+        404,
+        'Not found',
+        'Delete not possible: key and value not found'
+      );
+    return data;
+  }
+
   async analytics(): Promise<object> {
     debug('analytics method');
 
