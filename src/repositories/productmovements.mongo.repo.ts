@@ -55,8 +55,8 @@ export class ProductMovementMongoRepo {
     return data;
   }
 
-  async destroy(id: string): Promise<ProductMovement> {
-    debug('destroy method');
+  async deleteById(id: string): Promise<ProductMovement> {
+    debug('deleteById method');
     const data = await ProductMovementModel.findByIdAndDelete(id).exec();
     if (!data)
       throw new HTTPError(

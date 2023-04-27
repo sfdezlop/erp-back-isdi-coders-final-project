@@ -70,7 +70,7 @@ describe('Given a new ProductMovementMongoRepo created with a public static func
       expect(result).toEqual(mockResult);
     });
   });
-  describe('When we call the destroy method for a record that does not exist', () => {
+  describe('When we call the deleteById method for a record that does not exist', () => {
     test('Then the mongoose method findByIdAndDelete is called an it should throw an error of Record not found', async () => {
       (ProductMovementModel.findByIdAndDelete as jest.Mock).mockResolvedValue(
         undefined
@@ -80,7 +80,7 @@ describe('Given a new ProductMovementMongoRepo created with a public static func
       mongoose.disconnect();
 
       expect(() =>
-        instanceOfProductMovementsMongoRepo.destroy(mockId)
+        instanceOfProductMovementsMongoRepo.deleteById(mockId)
       ).rejects.toThrow();
       expect(ProductMovementModel.findByIdAndDelete).toHaveBeenCalled();
 
@@ -88,14 +88,16 @@ describe('Given a new ProductMovementMongoRepo created with a public static func
     });
   });
 
-  describe('When we call the destroy method for a record that exists', () => {
+  describe('When we call the deleteById method for a record that exists', () => {
     test('Then the mongoose method findByIdAndDelete is called and it should delete the record', async () => {
       const mockResult = { id: '10' };
       (ProductMovementModel.findByIdAndDelete as jest.Mock).mockImplementation(
         () => mockExecFunction(mockResult)
       );
       const mockId = '2';
-      const result = await instanceOfProductMovementsMongoRepo.destroy(mockId);
+      const result = await instanceOfProductMovementsMongoRepo.deleteById(
+        mockId
+      );
       mongoose.disconnect();
 
       expect(result).toEqual(mockResult);
