@@ -93,7 +93,7 @@ export class ProductsMongoRepo {
     return data;
   }
 
-  async deleteById(id: string): Promise<void> {
+  async deleteById(id: string): Promise<Product> {
     debug(id);
     const data = await ProductModel.findByIdAndDelete(id);
     if (!data)
@@ -102,9 +102,10 @@ export class ProductsMongoRepo {
         'Not found',
         'Delete not possible: id not found'
       );
+    return data;
   }
 
-  async deleteByKey(deleteKey: string, deleteValue: string): Promise<void> {
+  async deleteByKey(deleteKey: string, deleteValue: string): Promise<Product> {
     const data = await ProductModel.findByIdAndDelete({
       [deleteKey]: deleteValue,
     });
@@ -114,6 +115,7 @@ export class ProductsMongoRepo {
         'Not found',
         'Delete not possible: key and value not found'
       );
+    return data;
   }
 
   async countFilteredRecords(query: {
