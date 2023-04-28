@@ -34,6 +34,17 @@ productsRouter.post(
   logged,
   controller.groupValuesPerField.bind(controller)
 );
+
+productsRouter.post(
+  '/microservices/:path/:id',
+  logged,
+  controller.microserviceQueryByKeyValuePost.bind(controller)
+);
+productsRouter.get(
+  '/microservices/:path/:id',
+  logged,
+  controller.microserviceQueryByKeyValueGet.bind(controller)
+);
 productsRouter.post('/', logged, controller.create.bind(controller));
 productsRouter.get('/:path/:id', logged, controller.getByKey.bind(controller));
 productsRouter.get('/:id', logged, controller.getById.bind(controller));

@@ -142,4 +142,37 @@ describe('Given a new ProductsMongoRepo created with a public static function (t
       expect(ProductModel.aggregate).toHaveBeenCalled();
     });
   });
+
+  describe('When we use the microserviceQueryByKeyValue method to a record that exists', () => {
+    test('Then it should return data', async () => {
+      (ProductModel.aggregate as jest.Mock).mockResolvedValue([
+        {
+          valueOfKey: '1',
+        },
+      ]);
+
+      const result =
+        await instanceOfProductsMongoRepo.microserviceQueryByKeyValue(
+          'sku',
+          '1',
+          'sku'
+        );
+      mongoose.disconnect();
+      expect(ProductModel.aggregate).toHaveBeenCalled();
+      expect(result).toEqual('1');
+    });
+  });
+  describe('When we use the microserviceQueryByKeyValue method to a record that does not exists ', () => {
+    test('Then it should throw an error', async () => {
+      (ProductModel.aggregate as jest.Mock).mockResolvedValue(undefined);
+      expect(() =>
+        instanceOfProductsMongoRepo.microserviceQueryByKeyValue(
+          'inputKey',
+          'inputValue',
+          'outputKey'
+        )
+      ).rejects.toThrow(HTTPError);
+      mongoose.disconnect();
+    });
+  });
 });

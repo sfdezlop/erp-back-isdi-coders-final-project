@@ -106,6 +106,7 @@ export class ProductsMongoRepo {
   }
 
   async deleteByKey(deleteKey: string, deleteValue: string): Promise<Product> {
+    // When the key is id, its necessary to indicate _id in the fetch action
     const data = await ProductModel.findByIdAndDelete({
       [deleteKey]: deleteValue,
     });
@@ -150,5 +151,32 @@ export class ProductsMongoRepo {
     );
 
     return dataMap;
+  }
+
+  async microserviceQueryByKeyValue(
+    inputKey: string,
+    inputValue: unknown,
+    outputKey: string
+  ): Promise<object[]> {
+    debug('Instantiated at constructor at microserviceQueryByKeyValue method');
+    const data = await ProductModel.aggregate([
+      {
+        $group: {
+          _id: '$' + inputKey,
+          valueOfKey: {
+            $first: '$' + outputKey,
+          },
+        },
+      },
+      { $match: { _id: inputValue } },
+    ]);
+
+    if (!data)
+      throw new HTTPError(
+        404,
+        'Not found',
+        'Value not found in microserviceQueryByKeyValue'
+      );
+    return data[0].valueOfKey;
   }
 }
