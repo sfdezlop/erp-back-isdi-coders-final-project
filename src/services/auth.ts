@@ -16,14 +16,18 @@ const salt = 10;
 
 export class Auth {
   static createJWT(payload: PayloadToken) {
-    return jwt.sign(payload, config.JWT_SECRET as string);
+    return jwt.sign(payload, config.JWT_SECRET as string, {
+      expiresIn: 60 * 60 * 24,
+    });
   }
+
+  // Expiration in seconds
 
   static verifyJWTGettingPayload(token: string) {
     const result = jwt.verify(token, config.JWT_SECRET as string);
     if (typeof result === 'string')
       throw new HTTPError(498, 'Invalid payload', result);
-    return result as PayloadToken;
+    return result as unknown as PayloadToken;
   }
 
   static hash(value: string) {
