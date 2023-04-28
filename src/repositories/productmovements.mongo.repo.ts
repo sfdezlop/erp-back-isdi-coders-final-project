@@ -72,6 +72,7 @@ export class ProductMovementMongoRepo {
     deleteKey: string,
     deleteValue: string
   ): Promise<ProductMovement> {
+    // When the key is id, its necessary to indicate _id in the fetch action
     const data = await ProductMovementModel.findByIdAndDelete({
       [deleteKey]: deleteValue,
     }).exec();
@@ -271,7 +272,7 @@ export class ProductMovementMongoRepo {
 
     if (!data)
       throw new HTTPError(
-        444,
+        404,
         'sku not found in stockBySku',
         'sku not found in stockBySku'
       );
