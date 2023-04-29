@@ -10,18 +10,37 @@ describe('Given the product controller', () => {
     queryByKey: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
-    destroy: jest.fn(),
+    deleteById: jest.fn(),
     deleteByKey: jest.fn(),
     countFilteredRecords: jest.fn(),
     leftJoinProductMovements: jest.fn(),
     groupValuesPerField: jest.fn(),
+    microserviceQueryByKeyValue: jest.fn(),
   } as unknown as ProductsMongoRepo;
 
+  const repoMockWithoutResp = {
+    getByFilterWithPaginationAndOrder: jest.fn().mockReturnValue(null),
+    queryId: jest.fn().mockReturnValue(null),
+    queryByKey: jest.fn().mockReturnValue(null),
+    create: jest.fn().mockReturnValue(null),
+    update: jest.fn().mockReturnValue(null),
+    deleteById: jest.fn().mockReturnValue(null),
+    deleteByKey: jest.fn().mockReturnValue(null),
+    countFilteredRecords: jest.fn().mockReturnValue(null),
+    leftJoinProductMovements: jest.fn().mockReturnValue(undefined),
+    groupValuesPerField: jest.fn().mockReturnValue(null),
+    microserviceQueryByKeyValue: jest.fn().mockReturnValue(undefined),
+  } as unknown as ProductsMongoRepo;
   const controller = new ProductsController(repoMock);
-
+  const controllerWithoutResp = new ProductsController(repoMockWithoutResp);
   const resp = {
     json: jest.fn(),
     status: jest.fn(),
+  } as unknown as Response;
+
+  const respKO = {
+    json: jest.fn().mockReturnValue(undefined),
+    status: jest.fn().mockReturnValue(undefined),
   } as unknown as Response;
 
   const next = jest.fn() as unknown as NextFunction;
@@ -117,14 +136,14 @@ describe('Given the product controller', () => {
     });
   });
 
-  describe('When the delete method is called', () => {
+  describe('When the deleteById method is called', () => {
     test('Then, if everything is correct, the response should have results', async () => {
-      await controller.delete(req, resp, next);
+      await controller.deleteById(req, resp, next);
       expect(resp.json).toHaveBeenCalled();
     });
     test('Then, if there is not a correct body at the request, it should call next', async () => {
       const req = null as unknown as Request;
-      await controller.delete(req, resp, next);
+      await controller.deleteById(req, resp, next);
       expect(next).toHaveBeenCalled();
     });
   });
@@ -158,9 +177,8 @@ describe('Given the product controller', () => {
       await controller.leftJoinProductMovements(req, resp, next);
       expect(resp.json).toHaveBeenCalled();
     });
-    test('Then, if there is no request, it should call next and throw an error', async () => {
-      const req = null as unknown as Request;
-      await controller.leftJoinProductMovements(req, resp, next);
+    test('Then, if there is no response, it should call next', async () => {
+      await controllerWithoutResp.leftJoinProductMovements(req, respKO, next);
       expect(next).toHaveBeenCalled();
     });
   });
@@ -174,6 +192,45 @@ describe('Given the product controller', () => {
       const req = null as unknown as Request;
       await controller.groupValuesPerField(req, resp, next);
       expect(next).toHaveBeenCalled();
+    });
+  });
+
+  describe('When the microserviceQueryByKeyValue method is called', () => {
+    test('Then, if there is not a correct body at the request, it should call next', async () => {
+      const req = null as unknown as Request;
+      await controller.microserviceQueryByKeyValue(req, resp, next);
+      expect(next).toHaveBeenCalled();
+    });
+    test('Then, if there is not a correct bearer authorization at request headers, it should throw and error an call next', async () => {
+      const mockReq = {
+        headers: { authorization: 'notBearer' },
+        body: {},
+      } as unknown as Request;
+      await controller.microserviceQueryByKeyValue(mockReq, resp, next);
+      expect(next).toHaveBeenCalled();
+      expect(HTTPError).toThrowError();
+    });
+
+    test('Then, if there is a correct bearer authorization at request headers but there is no id included in the request params, it should throw and error an call next', async () => {
+      const mockReq = {
+        headers: { authorization: 'Bearer ' },
+        body: {},
+        params: { id: null },
+      } as unknown as Request;
+      await controller.microserviceQueryByKeyValue(mockReq, resp, next);
+      expect(next).toHaveBeenCalled();
+      expect(HTTPError).toThrowError();
+    });
+    test('Then, if everything is correct at the request, the response should have results', async () => {
+      const mockReq = {
+        headers: { authorization: 'Bearer ' },
+        body: { outputKey: 'mockOutputKey' },
+        params: { id: 'mockId', path: 'mockPath' },
+      } as unknown as Request;
+
+      await controller.microserviceQueryByKeyValue(mockReq, resp, next);
+      expect(resp.json).toHaveBeenCalled();
+      expect(resp.status).toHaveBeenCalled();
     });
   });
 });

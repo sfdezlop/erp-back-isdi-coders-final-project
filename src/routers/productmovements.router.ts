@@ -65,3 +65,15 @@ productMovementsRouter.get(
 
   controller.getById.bind(controller)
 );
+
+productMovementsRouter.delete(
+  '/:path/:id',
+  logged,
+  controller.deleteByKey.bind(controller)
+);
+productMovementsRouter.delete(
+  '/:id',
+  logged,
+
+  controller.deleteById.bind(controller)
+);

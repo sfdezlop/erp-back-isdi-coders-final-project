@@ -55,8 +55,8 @@ export class ProductMovementMongoRepo {
     return data;
   }
 
-  async destroy(id: string): Promise<ProductMovement> {
-    debug('destroy method');
+  async deleteById(id: string): Promise<ProductMovement> {
+    debug('deleteById method');
     const data = await ProductMovementModel.findByIdAndDelete(id).exec();
     if (!data)
       throw new HTTPError(
@@ -65,6 +65,23 @@ export class ProductMovementMongoRepo {
         'Delete not possible: id not found'
       );
 
+    return data;
+  }
+
+  async deleteByKey(
+    deleteKey: string,
+    deleteValue: string
+  ): Promise<ProductMovement> {
+    // When the key is id, its necessary to indicate _id in the fetch action
+    const data = await ProductMovementModel.findByIdAndDelete({
+      [deleteKey]: deleteValue,
+    }).exec();
+    if (!data)
+      throw new HTTPError(
+        404,
+        'Not found',
+        'Delete not possible: key and value not found'
+      );
     return data;
   }
 
@@ -225,13 +242,11 @@ export class ProductMovementMongoRepo {
     filterValue: string;
   }): Promise<number> {
     debug('countFilteredRecords method');
-    debug(query);
     const data = await ProductMovementModel.find({
       [query.filterField]: query.filterValue,
     })
       .countDocuments()
       .exec();
-    debug(data);
     return data;
   }
 
@@ -257,7 +272,7 @@ export class ProductMovementMongoRepo {
 
     if (!data)
       throw new HTTPError(
-        444,
+        404,
         'sku not found in stockBySku',
         'sku not found in stockBySku'
       );

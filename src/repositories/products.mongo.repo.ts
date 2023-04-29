@@ -93,7 +93,7 @@ export class ProductsMongoRepo {
     return data;
   }
 
-  async destroy(id: string): Promise<void> {
+  async deleteById(id: string): Promise<Product> {
     debug(id);
     const data = await ProductModel.findByIdAndDelete(id);
     if (!data)
@@ -102,9 +102,11 @@ export class ProductsMongoRepo {
         'Not found',
         'Delete not possible: id not found'
       );
+    return data;
   }
 
-  async deleteByKey(deleteKey: string, deleteValue: string): Promise<void> {
+  async deleteByKey(deleteKey: string, deleteValue: string): Promise<Product> {
+    // When the key is id, its necessary to indicate _id in the fetch action
     const data = await ProductModel.findByIdAndDelete({
       [deleteKey]: deleteValue,
     });
@@ -114,6 +116,7 @@ export class ProductsMongoRepo {
         'Not found',
         'Delete not possible: key and value not found'
       );
+    return data;
   }
 
   async countFilteredRecords(query: {
@@ -121,11 +124,9 @@ export class ProductsMongoRepo {
     filterValue: string;
   }): Promise<number> {
     debug('Instantiated at constructor at countFilteredRecords method');
-    debug(query);
     const data = await ProductModel.find({
       [query.filterField]: query.filterValue,
     }).countDocuments();
-    debug(data);
     return data;
   }
 
@@ -150,5 +151,32 @@ export class ProductsMongoRepo {
     );
 
     return dataMap;
+  }
+
+  async microserviceQueryByKeyValue(
+    inputKey: string,
+    inputValue: unknown,
+    outputKey: string
+  ): Promise<object[]> {
+    debug('Instantiated at constructor at microserviceQueryByKeyValue method');
+    const data = await ProductModel.aggregate([
+      {
+        $group: {
+          _id: '$' + inputKey,
+          valueOfKey: {
+            $first: '$' + outputKey,
+          },
+        },
+      },
+      { $match: { _id: inputValue } },
+    ]);
+
+    if (!data)
+      throw new HTTPError(
+        404,
+        'Not found',
+        'Value not found in microserviceQueryByKeyValue'
+      );
+    return data[0].valueOfKey;
   }
 }

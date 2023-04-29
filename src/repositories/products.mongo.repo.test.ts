@@ -76,27 +76,52 @@ describe('Given a new ProductsMongoRepo created with a public static function (t
     });
   });
 
-  describe('When we use the destroy method ', () => {
+  describe('When we use the deleteById method ', () => {
     test('Then the mongoose method findByIdAndDelete is called', async () => {
       (ProductModel.findByIdAndDelete as jest.Mock).mockResolvedValue(1);
       const mockUserId = '1';
-      await instanceOfProductsMongoRepo.destroy(mockUserId);
+      await instanceOfProductsMongoRepo.deleteById(mockUserId);
       mongoose.disconnect();
       expect(ProductModel.findByIdAndDelete).toHaveBeenCalled();
     });
   });
 
-  describe('When we use the destroy method to a record that exists', () => {
+  describe('When we use the deleteById method to a record that exists', () => {
     test('Then it should delete the record', async () => {
       (ProductModel.findByIdAndDelete as jest.Mock).mockResolvedValue({});
-      const mockUserId = '2';
-      const result = await instanceOfProductsMongoRepo.destroy(mockUserId);
+      const mockId = '2';
+      const result = await instanceOfProductsMongoRepo.deleteById(mockId);
       mongoose.disconnect();
       expect(ProductModel.findByIdAndDelete).toHaveBeenCalled();
-      expect(result).toEqual(undefined);
+      expect(result).toEqual({});
     });
   });
 
+  describe('When we use the deleteById method to a record that does not exists ', () => {
+    test('Then it should throw an error of key and value not found', async () => {
+      (ProductModel.findByIdAndDelete as jest.Mock).mockResolvedValue(
+        undefined
+      );
+      expect(() => instanceOfProductsMongoRepo.deleteById('')).rejects.toThrow(
+        HTTPError
+      );
+      mongoose.disconnect();
+    });
+  });
+
+  describe('When we use the deleteByKey method to a record that exists', () => {
+    test('Then it should delete the record', async () => {
+      (ProductModel.findByIdAndDelete as jest.Mock).mockResolvedValue({});
+
+      const result = await instanceOfProductsMongoRepo.deleteByKey(
+        'key',
+        'value'
+      );
+      mongoose.disconnect();
+      expect(ProductModel.findByIdAndDelete).toHaveBeenCalled();
+      expect(result).toEqual({});
+    });
+  });
   describe('When we use the deleteByKey method to a record that does not exists ', () => {
     test('Then it should throw an error of key and value not found', async () => {
       (ProductModel.findByIdAndDelete as jest.Mock).mockResolvedValue(
@@ -115,6 +140,39 @@ describe('Given a new ProductsMongoRepo created with a public static function (t
       await instanceOfProductsMongoRepo.groupValuesPerField('mock');
       mongoose.disconnect();
       expect(ProductModel.aggregate).toHaveBeenCalled();
+    });
+  });
+
+  describe('When we use the microserviceQueryByKeyValue method to a record that exists', () => {
+    test('Then it should return data', async () => {
+      (ProductModel.aggregate as jest.Mock).mockResolvedValue([
+        {
+          valueOfKey: '1',
+        },
+      ]);
+
+      const result =
+        await instanceOfProductsMongoRepo.microserviceQueryByKeyValue(
+          'sku',
+          '1',
+          'sku'
+        );
+      mongoose.disconnect();
+      expect(ProductModel.aggregate).toHaveBeenCalled();
+      expect(result).toEqual('1');
+    });
+  });
+  describe('When we use the microserviceQueryByKeyValue method to a record that does not exists ', () => {
+    test('Then it should throw an error', async () => {
+      (ProductModel.aggregate as jest.Mock).mockResolvedValue(undefined);
+      expect(() =>
+        instanceOfProductsMongoRepo.microserviceQueryByKeyValue(
+          'inputKey',
+          'inputValue',
+          'outputKey'
+        )
+      ).rejects.toThrow(HTTPError);
+      mongoose.disconnect();
     });
   });
 });

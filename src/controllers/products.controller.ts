@@ -30,7 +30,7 @@ export class ProductsController {
       const getId = req.params.id;
       const data = await this.repo.queryId(getId);
       resp.json({
-        results: data,
+        results: [data],
       });
     } catch (error) {
       next(error);
@@ -88,11 +88,11 @@ export class ProductsController {
     }
   }
 
-  async delete(req: Request, resp: Response, next: NextFunction) {
+  async deleteById(req: Request, resp: Response, next: NextFunction) {
     try {
-      debug('delete-method');
+      debug('deleteById-method');
       const deleteId = req.params.id;
-      const data = await this.repo.destroy(deleteId);
+      const data = await this.repo.deleteById(deleteId);
       resp.json({
         results: data,
       });
@@ -146,6 +146,56 @@ export class ProductsController {
     try {
       const fieldToGroup = req.params.id;
       const data = await this.repo.groupValuesPerField(fieldToGroup);
+      resp.status(200);
+      resp.json({
+        results: data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async microserviceQueryByKeyValue(
+    req: Request,
+    resp: Response,
+    next: NextFunction
+  ) {
+    try {
+      debug('microserviceQueryByKeyValue-method');
+      if (
+        !req.headers.authorization ||
+        !req.headers.authorization.startsWith('Bearer ')
+      )
+        throw new HTTPError(
+          401,
+          'Unauthorized',
+          'A valid token is needed in the authorization header'
+        );
+      if (!req.params.id || !req.params.path)
+        throw new HTTPError(
+          400,
+          'Bad request',
+          'Path and Id needed in the request with information about the record to find'
+        );
+
+      const inputKey = req.params.path
+        .split('inputkey-')[1]
+        .split('-outputkey-')[0];
+      console.log(inputKey);
+      const outputKey = req.params.path.split('-outputkey-')[1];
+      const inputValue = req.params.id.split('inputvalue-')[1];
+
+      const data = await this.repo.microserviceQueryByKeyValue(
+        inputKey,
+        inputValue,
+        outputKey
+      );
+      if (!data)
+        throw new HTTPError(
+          422,
+          'Unprocessable Content',
+          'microserviceQueryByKeyValue has not been applied'
+        );
       resp.status(200);
       resp.json({
         results: data,
