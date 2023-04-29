@@ -195,10 +195,10 @@ describe('Given the product controller', () => {
     });
   });
 
-  describe('When the microserviceQueryByKeyValuePost method is called', () => {
+  describe('When the microserviceQueryByKeyValue method is called', () => {
     test('Then, if there is not a correct body at the request, it should call next', async () => {
       const req = null as unknown as Request;
-      await controller.microserviceQueryByKeyValuePost(req, resp, next);
+      await controller.microserviceQueryByKeyValue(req, resp, next);
       expect(next).toHaveBeenCalled();
     });
     test('Then, if there is not a correct bearer authorization at request headers, it should throw and error an call next', async () => {
@@ -206,7 +206,7 @@ describe('Given the product controller', () => {
         headers: { authorization: 'notBearer' },
         body: {},
       } as unknown as Request;
-      await controller.microserviceQueryByKeyValuePost(mockReq, resp, next);
+      await controller.microserviceQueryByKeyValue(mockReq, resp, next);
       expect(next).toHaveBeenCalled();
       expect(HTTPError).toThrowError();
     });
@@ -217,46 +217,7 @@ describe('Given the product controller', () => {
         body: {},
         params: { id: null },
       } as unknown as Request;
-      await controller.microserviceQueryByKeyValuePost(mockReq, resp, next);
-      expect(next).toHaveBeenCalled();
-      expect(HTTPError).toThrowError();
-    });
-    test('Then, if everything is correct, the response should have results', async () => {
-      const mockReq = {
-        headers: { authorization: 'Bearer ' },
-        body: { outputKey: 'mockOutputKey' },
-        params: { id: 'mockId', path: 'mockPath' },
-      } as unknown as Request;
-
-      await controller.microserviceQueryByKeyValuePost(mockReq, resp, next);
-      expect(resp.json).toHaveBeenCalled();
-      expect(resp.status).toHaveBeenCalled();
-    });
-  });
-
-  describe('When the microserviceQueryByKeyValueGet method is called', () => {
-    test('Then, if there is not a correct body at the request, it should call next', async () => {
-      const req = null as unknown as Request;
-      await controller.microserviceQueryByKeyValueGet(req, resp, next);
-      expect(next).toHaveBeenCalled();
-    });
-    test('Then, if there is not a correct bearer authorization at request headers, it should throw and error an call next', async () => {
-      const mockReq = {
-        headers: { authorization: 'notBearer' },
-        body: {},
-      } as unknown as Request;
-      await controller.microserviceQueryByKeyValueGet(mockReq, resp, next);
-      expect(next).toHaveBeenCalled();
-      expect(HTTPError).toThrowError();
-    });
-
-    test('Then, if there is a correct bearer authorization at request headers but there is no id included in the request params, it should throw and error an call next', async () => {
-      const mockReq = {
-        headers: { authorization: 'Bearer ' },
-        body: {},
-        params: { id: null },
-      } as unknown as Request;
-      await controller.microserviceQueryByKeyValueGet(mockReq, resp, next);
+      await controller.microserviceQueryByKeyValue(mockReq, resp, next);
       expect(next).toHaveBeenCalled();
       expect(HTTPError).toThrowError();
     });
@@ -267,7 +228,7 @@ describe('Given the product controller', () => {
         params: { id: 'mockId', path: 'mockPath' },
       } as unknown as Request;
 
-      await controller.microserviceQueryByKeyValueGet(mockReq, resp, next);
+      await controller.microserviceQueryByKeyValue(mockReq, resp, next);
       expect(resp.json).toHaveBeenCalled();
       expect(resp.status).toHaveBeenCalled();
     });
