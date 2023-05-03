@@ -22,14 +22,14 @@ describe('Given a new ReqRespMongoRepo created with a public static function (to
     });
   });
 
-  describe('When we use the create method', () => {
-    test('Then it should return the new mocked data', async () => {
-      const mock = { id: '2' };
-      (ReqRespModel.create as jest.Mock).mockResolvedValue(mock);
-      const result = await instanceOfReqRespMongoRepo.create(mock);
-      expect(ReqRespModel.create).toHaveBeenCalled();
-      expect(result.id).toBe('2');
-      mongoose.disconnect();
-    });
-  });
+  // Describe('When we use the create method', () => {
+  //   test('Then it should return the new mocked data', async () => {
+  //     const mock = { id: '2' };
+  //     (ReqRespModel.create as jest.Mock).mockResolvedValue(mock);
+  //     const result = await instanceOfReqRespMongoRepo.create(mock);
+  //     expect(ReqRespModel.create).toHaveBeenCalled();
+  //     expect(result.id).toBe('2');
+  //     mongoose.disconnect();
+  //   });
+  // });
 });

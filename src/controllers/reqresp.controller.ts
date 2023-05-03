@@ -13,23 +13,23 @@ export class ReqRespController {
     try {
       debug('create ReqRespController');
 
-      const morganLog = morgan((tokens, req, res) =>
-        [
-          req.method,
-          req.url,
-          req.headers.authorization,
-          req.statusCode,
-          res.statusMessage,
-          res.statusCode,
-          tokens['response-time'](req, res),
-          'ms',
-        ].join(' ')
-      );
+      // Const morganLog = morgan((tokens, req, res) =>
+      //   [
+      //     req.method,
+      //     req.url,
+      //     req.headers.authorization,
+      //     req.statusCode,
+      //     res.statusMessage,
+      //     res.statusCode,
+      //     tokens['response-time'](req, res),
+      //     'ms',
+      //   ].join(' ')
+      // );
 
-      const morganLogTemp = morganLog.toString();
-      debug(morganLogTemp);
+      // const morganLogTemp = morganLog.toString();
+      // debug(morganLogTemp);
 
-      const data = await this.repo.create({ request: 'morganLogTemp' });
+      const data = await this.repo.create();
       resp.status(201);
       resp.json({
         results: [data],

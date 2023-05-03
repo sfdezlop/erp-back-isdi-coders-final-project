@@ -1,5 +1,5 @@
-// Import path from 'path';
-// Import { fileURLToPath } from 'url';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -12,4 +12,4 @@ export const config = {
   JWT_SECRET: process.env.JWT_SECRET,
 };
 
-// Export const __dirname = path.dirname(fileURLToPath(import.meta.url));
+export const __dirname = path.dirname(fileURLToPath(import.meta.url));
