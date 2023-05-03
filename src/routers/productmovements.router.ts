@@ -60,6 +60,13 @@ productMovementsRouter.get(
 );
 
 productMovementsRouter.get(
+  '/microservices/stock/:path/:id',
+  logged,
+
+  controller.microserviceStockGroupByKeysFilteredByKeyValue.bind(controller)
+);
+
+productMovementsRouter.get(
   '/:id',
   logged,
 
