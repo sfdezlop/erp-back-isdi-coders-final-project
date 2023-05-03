@@ -61,7 +61,7 @@ export class ProductMovementsController {
         );
       resp.status(201);
       resp.json({
-        results: data,
+        results: [data],
       });
     } catch (error) {
       next(error);
@@ -157,7 +157,7 @@ export class ProductMovementsController {
       const deleteId = req.params.id;
       const data = await this.repo.deleteByKey(deleteKey, deleteId);
       resp.json({
-        results: data,
+        results: [data],
       });
     } catch (error) {
       next(error);
@@ -246,6 +246,66 @@ export class ProductMovementsController {
           'Id needed in the request with information about the record to get the stock'
         );
       const data = await this.repo.stockBySku(req.params.id);
+      if (!data)
+        throw new HTTPError(
+          422,
+          'Unprocessable Content',
+          'Stock calculation has not been applied'
+        );
+      resp.status(200);
+      resp.json({
+        results: [data],
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async microserviceStockGroupByKeysFilteredByKeyValue(
+    req: Request,
+    resp: Response,
+    next: NextFunction
+  ) {
+    try {
+      debug('microserviceStockGroupByKeysFilteredByKeyValue-method');
+      if (
+        !req.headers.authorization ||
+        !req.headers.authorization.startsWith('Bearer ')
+      )
+        throw new HTTPError(
+          401,
+          'Unauthorized',
+          'A token is needed in the authorization header'
+        );
+      if (!req.params.path)
+        throw new HTTPError(
+          400,
+          'Bad request',
+          'Path needed in the request with information about the stock query'
+        );
+      if (!req.params.id)
+        throw new HTTPError(
+          400,
+          'Bad request',
+          'Id needed in the request with information about the stock query'
+        );
+
+      const firstGroupByKey = req.params.path
+        .split('firstgroupbykey-')[1]
+        .split('-secondgroupbykey-')[0];
+      const secondGroupByKey = req.params.path
+        .split('-secondgroupbykey-')[1]
+        .split('-filterkey-')[0];
+      const filterKey = req.params.path.split('-filterkey-')[1];
+      const filterValue = req.params.id.split('filtervalue-')[1];
+
+      const data =
+        await this.repo.microserviceStockGroupByKeysFilteredByKeyValue(
+          firstGroupByKey,
+          secondGroupByKey,
+          filterKey,
+          filterValue
+        );
       if (!data)
         throw new HTTPError(
           422,
