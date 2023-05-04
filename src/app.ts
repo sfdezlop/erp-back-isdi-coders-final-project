@@ -13,6 +13,7 @@ import fs from 'fs';
 import { reqRespRouter } from './routers/reqresp.router.js';
 import { ReqRespController } from './controllers/reqresp.controller.js';
 import { ReqRespMongoRepo } from './repositories/reqresp.mongo.repo.js';
+import { collectionsRouter } from './routers/collections.router.js';
 
 const debug = createDebug('ERP:app');
 export const app = express();
@@ -75,6 +76,7 @@ app.use(cors(corsOptions));
 app.use('/productmovements', productMovementsRouter);
 app.use('/users', usersRouter);
 app.use('/products', productsRouter);
+app.use('/collections', collectionsRouter);
 
 app.get('/', (_req, resp) => {
   resp.json({
