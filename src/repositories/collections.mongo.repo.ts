@@ -96,9 +96,7 @@ export class CollectionsMongoRepo {
       .find(filterValueObjectPattern)
       .skip((querySet - 1) * queryRecordsPerSet)
       .limit(queryRecordsPerSet)
-      .sort([[orderField, orderType === 'asc' ? 'asc' : 'desc']])
-      .exec();
-
+      .sort([[orderField, orderType === 'asc' ? 'asc' : 'desc']]);
     if (!data)
       throw new HTTPError(
         404,
@@ -243,7 +241,7 @@ export class CollectionsMongoRepo {
             [secondGroupByField]: 1,
           },
         },
-      ]).exec();
+      ]);
 
     if (!data)
       throw new HTTPError(
