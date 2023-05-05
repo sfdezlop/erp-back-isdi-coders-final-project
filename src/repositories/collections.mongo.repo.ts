@@ -22,7 +22,7 @@ export class CollectionsMongoRepo {
     debug('Instantiated at constructor');
   }
 
-  async read(encodedQuery: string): Promise<Collection[]> {
+  async read(encodedQuery: string) {
     debug('Instantiated at constructor at read method');
     const decodedQuery = decodeURI(encodedQuery);
 
@@ -90,7 +90,7 @@ export class CollectionsMongoRepo {
             [filterField]: filterValue,
           };
 
-    const data: Collection[] = await CollectionModel.find({
+    const data = await CollectionModel.find({
       [searchField]: { $regex: searchValueRegexPattern },
     })
       .find(filterValueObjectPattern)
