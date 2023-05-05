@@ -19,3 +19,8 @@ collectionsRouter.get(
   logged,
   controller.groupBy.bind(controller)
 );
+collectionsRouter.get(
+  '/groupbyset/:id',
+  logged,
+  controller.groupBySet.bind(controller)
+);

@@ -40,10 +40,8 @@ export class CollectionsController {
       resp.json({
         results: data,
       });
-      return data;
     } catch (error) {
       next(error);
-      return [];
     }
   }
 
@@ -77,10 +75,43 @@ export class CollectionsController {
       resp.json({
         results: data,
       });
-      return data;
     } catch (error) {
       next(error);
-      return [];
+    }
+  }
+
+  async groupBySet(req: Request, resp: Response, next: NextFunction) {
+    try {
+      debug('groupBySet-method');
+      if (
+        req.headers.authorization === undefined ||
+        !req.headers.authorization.startsWith('Bearer ')
+      )
+        throw new HTTPError(
+          401,
+          'Unauthorized',
+          'A valid token is needed in the authorization header'
+        );
+      if (!req.params.id)
+        throw new HTTPError(
+          400,
+          'Bad request',
+          'Query Id needed in the request with information about the records to read'
+        );
+
+      const data = await this.repo.groupBySet(req.path);
+      if (!data)
+        throw new HTTPError(
+          422,
+          'Unprocessable Content',
+          'groupBySet method has not been applied'
+        );
+      resp.status(200);
+      resp.json({
+        results: data,
+      });
+    } catch (error) {
+      next(error);
     }
   }
 }

@@ -79,8 +79,12 @@ export class CollectionsMongoRepo {
       case 'Exact match':
         searchValueRegexPattern = new RegExp(`^${searchValue}$`);
         break;
-      default:
+      case 'Contains':
         searchValueRegexPattern = new RegExp(`${searchValue}`);
+        break;
+      default:
+        // eslint-disable-next-line prefer-regex-literals
+        searchValueRegexPattern = new RegExp(`.*.`);
     }
 
     const filterValueObjectPattern =
@@ -90,9 +94,16 @@ export class CollectionsMongoRepo {
             [filterField]: filterValue,
           };
 
-    const data = await CollectionModel.find({
-      [searchField]: { $regex: searchValueRegexPattern },
-    })
+    const searchObjectPattern =
+      searchField === 'id'
+        ? { _id: searchValue }
+        : {
+            [searchField]: { $regex: searchValueRegexPattern },
+          };
+
+    // Find does not work with regexp for field id because ObjectID is stored as 12 binary bytes and regex is a 24-byte string
+
+    const data = await CollectionModel.find(searchObjectPattern)
       .find(filterValueObjectPattern)
       .skip((querySet - 1) * queryRecordsPerSet)
       .limit(queryRecordsPerSet)
@@ -154,29 +165,41 @@ export class CollectionsMongoRepo {
       case 'Exact match':
         searchValueRegexPattern = new RegExp(`^${searchValue}$`);
         break;
-      default:
+      case 'Contains':
         searchValueRegexPattern = new RegExp(`${searchValue}`);
+        break;
+      default:
+        // eslint-disable-next-line prefer-regex-literals
+        searchValueRegexPattern = new RegExp(`.*.`);
     }
 
+    const searchObjectPattern =
+      searchField === 'id'
+        ? { _id: searchValue }
+        : {
+            [searchField]: { $regex: searchValueRegexPattern },
+          };
+    // Use [searchKey] expression instead of $searchKey to force aggregate method to identify searchKey as a parameter, not a property.
+    // $match does not work with regexp for field id because ObjectID is stored as 12 binary bytes and regex is a 24-byte string
     let data: { documents: number; aggregateSumValue: number }[] =
       await CollectionModel.aggregate([
-        { $match: { [searchField]: { $regex: searchValueRegexPattern } } },
+        { $match: searchObjectPattern },
 
-        // Use [searchKey] expression instead of $searchKey to force aggregate method to identify searchKey as a parameter, not a property.
         // Place the $match as early in the aggregation pipeline as possible. Because $match limits the total number of documents in the aggregation pipeline, earlier $match operations minimize the amount of later processing. If you place a $match at the very beginning of a pipeline, the query can take advantage of indexes like any other db.collection.find() or db.collection.findOne().
 
         {
           $addFields: {
-            fakeFieldForCountingDocuments: 1,
+            addedFieldForCountingDocuments: 1,
           },
         },
         {
           $project: {
-            _id: false,
+            _id: true,
             [firstGroupByField]: true,
             [secondGroupByField]: true,
             [aggregateSumField]: true,
-            fakeFieldForCountingDocuments: true,
+            addedFieldForCountingDocuments: true,
+            // FakeId: true,
           },
         },
         {
@@ -197,7 +220,7 @@ export class CollectionsMongoRepo {
           $group: {
             _id: '$combinedGroupByValue',
             documents: {
-              $sum: '$fakeFieldForCountingDocuments',
+              $sum: '$addedFieldForCountingDocuments',
             },
             aggregateSumValue: {
               $sum: '$' + aggregateSumField,
@@ -250,9 +273,77 @@ export class CollectionsMongoRepo {
         'Impossible to groupBy at collection' + collection
       );
 
-    if (data.length === 0) data = [{ documents: 0, aggregateSumValue: 0 }];
+    if (data.length === 0) {
+      data = [{ documents: 0, aggregateSumValue: 0 }];
+      console.log();
+    }
 
     // Defensive result when there is no groupBy results
     return data;
+  }
+
+  async groupBySet(encodedQuery: string) {
+    debug('Instantiated at constructor at groupBySet method');
+    const decodedQuery = decodeURI(encodedQuery);
+
+    const collection = decodedQuery
+      .split('&collection=')[1]
+      .split('&groupbyfield=')[0];
+
+    const groupByField = decodedQuery.split('&groupbyfield=')[1];
+    let CollectionModel: typeof Model;
+
+    switch (collection) {
+      case 'products':
+        CollectionModel = ProductModel;
+        break;
+      case 'productmovements':
+        CollectionModel = ProductMovementModel;
+        break;
+      default:
+        CollectionModel = UserModel;
+    }
+
+    const groupByFieldPattern = groupByField === 'id' ? '_id' : groupByField;
+
+    let data: { set: string }[] = await CollectionModel.aggregate([
+      {
+        $group: {
+          _id: '$' + groupByFieldPattern,
+          set: {
+            $min: '$' + groupByFieldPattern,
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          set: 1,
+        },
+      },
+      {
+        $sort: {
+          set: 1,
+        },
+      },
+    ]);
+
+    if (!data)
+      throw new HTTPError(
+        404,
+        'Impossible to obtain the grouped set of values at collection' +
+          collection,
+        'Impossible to obtain the grouped set of values at collection' +
+          collection
+      );
+
+    if (data.length === 0) {
+      data = [{ set: '' }];
+    }
+
+    // Defensive result when there is no groupBy results
+    const dataSet = data.map((item) => item.set.toString());
+
+    return dataSet;
   }
 }
