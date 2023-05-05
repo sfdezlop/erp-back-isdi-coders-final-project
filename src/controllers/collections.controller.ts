@@ -40,10 +40,10 @@ export class CollectionsController {
       resp.json({
         results: data,
       });
-      return 'ok';
+      return data;
     } catch (error) {
       next(error);
-      return 'ko';
+      return [];
     }
   }
 
@@ -77,8 +77,10 @@ export class CollectionsController {
       resp.json({
         results: data,
       });
+      return data;
     } catch (error) {
       next(error);
+      return [];
     }
   }
 }
