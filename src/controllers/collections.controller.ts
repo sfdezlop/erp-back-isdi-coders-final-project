@@ -40,8 +40,10 @@ export class CollectionsController {
       resp.json({
         results: data,
       });
+      return 'ok';
     } catch (error) {
       next(error);
+      return 'ko';
     }
   }
 
