@@ -10,9 +10,6 @@ import { productsRouter } from './routers/products.router.js';
 import { productMovementsRouter } from './routers/productmovements.router.js';
 import fs from 'fs';
 
-import { reqRespRouter } from './routers/reqresp.router.js';
-import { ReqRespController } from './controllers/reqresp.controller.js';
-import { ReqRespMongoRepo } from './repositories/reqresp.mongo.repo.js';
 import { collectionsRouter } from './routers/collections.router.js';
 
 const debug = createDebug('ERP:app');
@@ -34,8 +31,10 @@ morgan.token('userLoggedToken', (req, res) =>
     : req.headers.authorization
 );
 
-morgan.token('userHost', (req, res) =>
-  req.headers.host === undefined || null || '' ? 'No host' : req.headers.host
+morgan.token(
+  'userHost',
+  (req, res) => req.headers.host ?? 'No host'
+  // Nullish coalescing operator: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Nullish_coalescing
 );
 
 export const morganStream = app.use(
@@ -64,8 +63,6 @@ export const morganStream = app.use(
     }
   )
 );
-
-const morganStreamToStrings = morganStream.get.toString();
 
 app.use(express.json());
 app.use(cors(corsOptions));

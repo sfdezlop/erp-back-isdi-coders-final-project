@@ -14,7 +14,7 @@ export class CollectionsController {
     try {
       debug('read-method');
       if (
-        !req.headers.authorization ||
+        req.headers.authorization === undefined ||
         !req.headers.authorization.startsWith('Bearer ')
       )
         throw new HTTPError(
@@ -51,7 +51,7 @@ export class CollectionsController {
     try {
       debug('groupBy-method');
       if (
-        !req.headers.authorization ||
+        req.headers.authorization === undefined ||
         !req.headers.authorization.startsWith('Bearer ')
       )
         throw new HTTPError(

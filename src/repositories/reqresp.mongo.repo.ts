@@ -27,7 +27,6 @@ export class ReqRespMongoRepo {
 
   async create(): Promise<ReqResp> {
     debug('Instantiated at constructor at create method');
-    // Console.log(morganStreamToString);
 
     const data = await ReqRespModel.create({ request: 'morganStreamToString' });
     return data;

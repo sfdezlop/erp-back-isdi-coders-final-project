@@ -1,6 +1,5 @@
 import { Router } from 'express';
-import { UsersController } from '../controllers/users.controller.js';
-import { UsersMongoRepo } from '../repositories/users.mongo.repo.js';
+
 import createDebug from 'debug';
 import { logged } from '../interceptors/logged.js';
 import { CollectionsMongoRepo } from '../repositories/collections.mongo.repo.js';
@@ -14,5 +13,9 @@ debug('loaded');
 const repo = CollectionsMongoRepo.getInstance();
 const controller = new CollectionsController(repo);
 
-collectionsRouter.get('/read/:id', controller.read.bind(controller));
-collectionsRouter.get('/groupby/:id', controller.groupBy.bind(controller));
+collectionsRouter.get('/read/:id', logged, controller.read.bind(controller));
+collectionsRouter.get(
+  '/groupby/:id',
+  logged,
+  controller.groupBy.bind(controller)
+);

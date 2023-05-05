@@ -68,7 +68,7 @@ export class CollectionsMongoRepo {
         CollectionModel = UserModel;
     }
 
-    let searchValueRegexPattern = new RegExp(`${searchValue}`); // Contains
+    let searchValueRegexPattern: RegExp; // Contains
     switch (searchType) {
       case 'Begins with':
         searchValueRegexPattern = new RegExp(`^${searchValue}`);
@@ -143,7 +143,7 @@ export class CollectionsMongoRepo {
         CollectionModel = UserModel;
     }
 
-    let searchValueRegexPattern = new RegExp(`${searchValue}`); // Contains
+    let searchValueRegexPattern: RegExp; // Contains
     switch (searchType) {
       case 'Begins with':
         searchValueRegexPattern = new RegExp(`^${searchValue}`);
