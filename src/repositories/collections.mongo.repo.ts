@@ -4,6 +4,7 @@ import { ProductModel } from './products.mongo.model.js';
 import { ProductMovementModel } from './productmovements.mongo.model.js';
 import { Collection, Model } from 'mongoose';
 import { HTTPError } from '../interfaces/error.js';
+import { AppCollectionFieldModel } from './appcollectionfields.mongo.model.js';
 
 const debug = createDebug('ERP:repo:collections');
 
@@ -58,6 +59,9 @@ export class CollectionsMongoRepo {
     let CollectionModel: typeof Model;
 
     switch (collection) {
+      case 'appcollectionfields':
+        CollectionModel = AppCollectionFieldModel;
+        break;
       case 'products':
         CollectionModel = ProductModel;
         break;
@@ -144,6 +148,9 @@ export class CollectionsMongoRepo {
     let CollectionModel: typeof Model;
 
     switch (collection) {
+      case 'appcollectionfields':
+        CollectionModel = AppCollectionFieldModel;
+        break;
       case 'products':
         CollectionModel = ProductModel;
         break;
@@ -294,6 +301,9 @@ export class CollectionsMongoRepo {
     let CollectionModel: typeof Model;
 
     switch (collection) {
+      case 'appcollectionfields':
+        CollectionModel = AppCollectionFieldModel;
+        break;
       case 'products':
         CollectionModel = ProductModel;
         break;
