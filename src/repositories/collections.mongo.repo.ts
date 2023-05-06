@@ -251,13 +251,35 @@ export class CollectionsMongoRepo {
         },
         {
           $addFields: {
+            firstGroupByField: {
+              $arrayElemAt: ['$combinedGroupByValueArray', 0],
+            },
+          },
+        },
+        {
+          $addFields: {
             [secondGroupByField]: {
               $arrayElemAt: ['$combinedGroupByValueArray', 1],
             },
           },
         },
         {
+          $addFields: {
+            secondGroupByField: {
+              $arrayElemAt: ['$combinedGroupByValueArray', 1],
+            },
+          },
+        },
+        {
+          $addFields: {
+            aggregateSumField: [aggregateSumField],
+          },
+        },
+        {
           $project: {
+            firstGroupByField: true,
+            secondGroupByField: true,
+            aggregateSumField: true,
             [firstGroupByField]: true,
             [secondGroupByField]: true,
             aggregateSumValue: true,
