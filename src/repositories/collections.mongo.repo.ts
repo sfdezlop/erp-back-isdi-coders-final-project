@@ -2,7 +2,7 @@ import createDebug from 'debug';
 import { UserModel } from './users.mongo.model.js';
 import { ProductModel } from './products.mongo.model.js';
 import { ProductMovementModel } from './productmovements.mongo.model.js';
-import { Collection, Model } from 'mongoose';
+import { Model } from 'mongoose';
 import { HTTPError } from '../interfaces/error.js';
 import { AppCollectionFieldModel } from './appcollectionfields.mongo.model.js';
 
@@ -188,7 +188,7 @@ export class CollectionsMongoRepo {
           };
     // Use [searchKey] expression instead of $searchKey to force aggregate method to identify searchKey as a parameter, not a property.
     // $match does not work with regexp for field id because ObjectID is stored as 12 binary bytes and regex is a 24-byte string
-    let data: { documents: number; aggregateSumValue: number }[] =
+    let data: { _id: string; documents: number; aggregateSumValue: number }[] =
       await CollectionModel.aggregate([
         { $match: searchObjectPattern },
 
@@ -251,46 +251,58 @@ export class CollectionsMongoRepo {
         },
         {
           $addFields: {
-            firstGroupByField: {
-              $arrayElemAt: ['$combinedGroupByValueArray', 0],
-            },
+            firstGroupByField,
           },
         },
         {
           $addFields: {
-            [secondGroupByField]: {
-              $arrayElemAt: ['$combinedGroupByValueArray', 1],
-            },
+            secondGroupByField,
           },
         },
         {
           $addFields: {
-            secondGroupByField: {
-              $arrayElemAt: ['$combinedGroupByValueArray', 1],
-            },
+            searchField: [searchField][0],
+          },
+        },
+
+        {
+          $addFields: {
+            aggregateSumField: [aggregateSumField][0],
           },
         },
         {
           $addFields: {
-            aggregateSumField: [aggregateSumField],
+            searchValue: [searchValue][0],
+          },
+        },
+        {
+          $addFields: {
+            searchType: [searchType][0],
+          },
+        },
+        {
+          $addFields: {
+            collection: [collection][0],
           },
         },
         {
           $project: {
+            collection: true,
             firstGroupByField: true,
             secondGroupByField: true,
+            searchField: true,
+            searchValue: true,
+            searchType: true,
             aggregateSumField: true,
-            [firstGroupByField]: true,
-            [secondGroupByField]: true,
             aggregateSumValue: true,
             documents: true,
-            _id: false,
+            combinedGroupByValueArray: true,
           },
         },
+
         {
           $sort: {
-            [firstGroupByField]: 1,
-            [secondGroupByField]: 1,
+            _id: 1,
           },
         },
       ]);
@@ -303,7 +315,7 @@ export class CollectionsMongoRepo {
       );
 
     if (data.length === 0) {
-      data = [{ documents: 0, aggregateSumValue: 0 }];
+      data = [{ _id: '_-_', documents: 0, aggregateSumValue: 0 }];
       console.log();
     }
 
