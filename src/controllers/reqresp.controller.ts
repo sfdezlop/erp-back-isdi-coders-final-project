@@ -1,7 +1,6 @@
 import { Response, Request, NextFunction } from 'express';
 import createDebug from 'debug';
 import { ReqRespMongoRepo } from '../repositories/reqresp.mongo.repo';
-import morgan from 'morgan';
 const debug = createDebug('ERP:controller:reqresp');
 
 export class ReqRespController {
@@ -13,23 +12,7 @@ export class ReqRespController {
     try {
       debug('create ReqRespController');
 
-      const morganLog = morgan((tokens, req, res) =>
-        [
-          req.method,
-          req.url,
-          req.headers.authorization,
-          req.statusCode,
-          res.statusMessage,
-          res.statusCode,
-          tokens['response-time'](req, res),
-          'ms',
-        ].join(' ')
-      );
-
-      const morganLogTemp = morganLog.toString();
-      debug(morganLogTemp);
-
-      const data = await this.repo.create({ request: 'morganLogTemp' });
+      const data = await this.repo.create();
       resp.status(201);
       resp.json({
         results: [data],

@@ -111,7 +111,7 @@ export class UsersController {
       const data = await this.repo.countRecords();
       resp.status(200);
       resp.json({
-        count: [data],
+        results: [data],
       });
     } catch (error) {
       next(error);

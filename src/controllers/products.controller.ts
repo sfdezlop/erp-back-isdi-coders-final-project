@@ -181,7 +181,6 @@ export class ProductsController {
       const inputKey = req.params.path
         .split('inputkey-')[1]
         .split('-outputkey-')[0];
-      console.log(inputKey);
       const outputKey = req.params.path.split('-outputkey-')[1];
       const inputValue = req.params.id.split('inputvalue-')[1];
 
@@ -198,7 +197,7 @@ export class ProductsController {
         );
       resp.status(200);
       resp.json({
-        results: data,
+        results: [data],
       });
     } catch (error) {
       next(error);

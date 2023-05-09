@@ -256,9 +256,10 @@ export class ProductMovementMongoRepo {
     return data;
   }
 
-  async stockBySku(sku: string): Promise<object[]> {
+  async stockBySku(sku: string): Promise<{ _id: string; stock: number }[]> {
     debug('stockBySku method');
     const data = await ProductMovementModel.aggregate([
+      { $match: { productSku: sku } },
       {
         $group: {
           _id: '$productSku',
@@ -267,7 +268,6 @@ export class ProductMovementMongoRepo {
           },
         },
       },
-      { $match: { _id: sku } },
     ]).exec();
 
     if (!data)
@@ -275,6 +275,90 @@ export class ProductMovementMongoRepo {
         404,
         'sku not found in stockBySku',
         'sku not found in stockBySku'
+      );
+    return data[0].stock;
+  }
+
+  async microserviceStockGroupByKeysFilteredByKeyValue(
+    firstGroupByKey: string,
+    secondGroupByKey: string,
+    filterKey: string,
+    filterValue: string
+  ): Promise<object[]> {
+    debug('microserviceStockGroupByKeysFilteredByKeyValue method');
+
+    const data = await ProductMovementModel.aggregate([
+      { $match: { [filterKey]: filterValue } },
+      // Use [filterKey] expression instead of $filterKey to force aggregate method to identify filterKey as a parameter, not a property. Place the $match as early in the aggregation pipeline as possible. Because $match limits the total number of documents in the aggregation pipeline, earlier $match operations minimize the amount of later processing. If you place a $match at the very beginning of a pipeline, the query can take advantage of indexes like any other db.collection.find() or db.collection.findOne().
+
+      {
+        $project: {
+          [firstGroupByKey]: true,
+          [secondGroupByKey]: true,
+          units: true,
+          _id: false,
+        },
+      },
+      {
+        $addFields: {
+          combinedGroupByKey: {
+            $concat: [firstGroupByKey, '_-_', secondGroupByKey],
+          },
+          combinedGroupByValue: {
+            $concat: ['$' + firstGroupByKey, '_-_', '$' + secondGroupByKey],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: '$combinedGroupByValue',
+          stock: {
+            $sum: '$units',
+          },
+        },
+      },
+      {
+        $addFields: {
+          combinedGroupByValueArray: {
+            $split: ['$_id', '_-_'],
+          },
+        },
+      },
+      {
+        $addFields: {
+          [firstGroupByKey]: {
+            $arrayElemAt: ['$combinedGroupByValueArray', 0],
+          },
+        },
+      },
+      {
+        $addFields: {
+          [secondGroupByKey]: {
+            $arrayElemAt: ['$combinedGroupByValueArray', 1],
+          },
+        },
+      },
+      {
+        $project: {
+          [firstGroupByKey]: true,
+          [secondGroupByKey]: true,
+          stock: true,
+          _id: false,
+        },
+      },
+      {
+        $sort: {
+          [firstGroupByKey]: 1,
+          [secondGroupByKey]: 1,
+        },
+      },
+    ]).exec();
+
+    if (!data)
+      throw new HTTPError(
+        404,
+        'microservice not found',
+        'microservice not found'
       );
     return data;
   }
