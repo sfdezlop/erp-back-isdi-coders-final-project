@@ -122,7 +122,7 @@ export class CollectionsMongoRepo {
         'Impossible to read at collection' + collection,
         'Impossible to read at collection' + collection
       );
-    console.log(data);
+
     return data;
   }
 
@@ -323,7 +323,6 @@ export class CollectionsMongoRepo {
 
     if (data.length === 0) {
       data = [{ _id: '_-_', documents: 0, aggregateSumValue: 0 }];
-      console.log();
     }
 
     // Defensive result when there is no groupBy results
