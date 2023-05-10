@@ -54,7 +54,9 @@ export class CollectionsMongoRepo {
     const orderField = decodedQuery
       .split('&orderfield=')[1]
       .split('&ordertype=')[0];
-    const orderType = decodedQuery.split('&ordertype=')[1];
+    const orderType = decodedQuery
+      .split('&ordertype=')[1]
+      .split('&controlinfo=')[0];
 
     let CollectionModel: typeof Model;
 
@@ -147,7 +149,9 @@ export class CollectionsMongoRepo {
     const searchType = decodedQuery
       .split('&searchtype=')[1]
       .split('&aggregatesumfield=')[0];
-    const aggregateSumField = decodedQuery.split('&aggregatesumfield=')[1];
+    const aggregateSumField = decodedQuery
+      .split('&aggregatesumfield=')[1]
+      .split('&controlinfo=')[0];
     let CollectionModel: typeof Model;
 
     switch (collection) {
@@ -334,7 +338,9 @@ export class CollectionsMongoRepo {
       .split('&collection=')[1]
       .split('&groupbyfield=')[0];
 
-    const groupByField = decodedQuery.split('&groupbyfield=')[1];
+    const groupByField = decodedQuery
+      .split('&groupbyfield=')[1]
+      .split('&controlinfo=')[0];
     let CollectionModel: typeof Model;
 
     switch (collection) {
