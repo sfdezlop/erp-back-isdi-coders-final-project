@@ -107,8 +107,10 @@ export class CollectionsMongoRepo {
 
     // Find does not work with regexp for field id because ObjectID is stored as 12 binary bytes and regex is a 24-byte string
 
-    const data = await CollectionModel.find(searchObjectPattern)
-      .find(filterValueObjectPattern)
+    const data = await CollectionModel.find({
+      $and: [filterValueObjectPattern, searchObjectPattern],
+    })
+
       .skip((querySet - 1) * queryRecordsPerSet)
       .limit(queryRecordsPerSet)
       .sort([[orderField, orderType === 'asc' ? 'asc' : 'desc']]);
@@ -118,6 +120,7 @@ export class CollectionsMongoRepo {
         'Impossible to read at collection' + collection,
         'Impossible to read at collection' + collection
       );
+    console.log(data);
     return data;
   }
 
