@@ -13,7 +13,16 @@ debug('loaded');
 const repo = CollectionsMongoRepo.getInstance();
 const controller = new CollectionsController(repo);
 
-collectionsRouter.get('/read/:id', logged, controller.read.bind(controller));
+collectionsRouter.get(
+  '/readrecords/:id',
+  logged,
+  controller.readRecords.bind(controller)
+);
+collectionsRouter.get(
+  '/readrecordfieldvalue/:id',
+  logged,
+  controller.readRecordFieldValue.bind(controller)
+);
 collectionsRouter.get(
   '/groupby/:id',
   logged,

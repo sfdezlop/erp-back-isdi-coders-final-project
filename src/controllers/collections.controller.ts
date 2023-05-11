@@ -10,9 +10,9 @@ export class CollectionsController {
     debug('Instantiate');
   }
 
-  async read(req: Request, resp: Response, next: NextFunction) {
+  async readRecords(req: Request, resp: Response, next: NextFunction) {
     try {
-      debug('read-method');
+      debug('readRecords-method');
       if (
         req.headers.authorization === undefined ||
         !req.headers.authorization.startsWith('Bearer ')
@@ -29,12 +29,47 @@ export class CollectionsController {
           'Query Id needed in the request with information about the records to read'
         );
 
-      const data = await this.repo.read(req.path);
+      const data = await this.repo.readRecords(req.path);
       if (!data)
         throw new HTTPError(
           422,
           'Unprocessable Content',
-          'read method has not been applied'
+          'readRecords method has not been applied'
+        );
+      resp.status(200);
+      resp.json({
+        results: data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async readRecordFieldValue(req: Request, resp: Response, next: NextFunction) {
+    try {
+      debug('readRecordFieldValue-method');
+      if (
+        req.headers.authorization === undefined ||
+        !req.headers.authorization.startsWith('Bearer ')
+      )
+        throw new HTTPError(
+          401,
+          'Unauthorized',
+          'A valid token is needed in the authorization header'
+        );
+      if (!req.params.id)
+        throw new HTTPError(
+          400,
+          'Bad request',
+          'Query Id needed in the request with information about the records to read'
+        );
+
+      const data = await this.repo.readRecordFieldValue(req.path);
+      if (!data)
+        throw new HTTPError(
+          422,
+          'Unprocessable Content',
+          'readRecordFieldValue method has not been applied'
         );
       resp.status(200);
       resp.json({

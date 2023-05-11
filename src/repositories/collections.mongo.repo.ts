@@ -2,7 +2,7 @@ import createDebug from 'debug';
 import { UserModel } from './users.mongo.model.js';
 import { ProductModel } from './products.mongo.model.js';
 import { ProductMovementModel } from './productmovements.mongo.model.js';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { HTTPError } from '../interfaces/error.js';
 import { AppCollectionFieldModel } from './appcollectionfields.mongo.model.js';
 
@@ -23,8 +23,8 @@ export class CollectionsMongoRepo {
     debug('Instantiated at constructor');
   }
 
-  async read(encodedQuery: string) {
-    debug('Instantiated at constructor at read method');
+  async readRecords(encodedQuery: string) {
+    debug('readRecords-method');
     const decodedQuery = decodeURI(encodedQuery);
 
     const collection = decodedQuery
@@ -126,8 +126,104 @@ export class CollectionsMongoRepo {
     return data;
   }
 
+  async readRecordFieldValue(encodedQuery: string): Promise<unknown[]> {
+    debug('readRecordFieldValue-method');
+
+    const decodedQuery = decodeURI(encodedQuery);
+
+    const collection = decodedQuery
+      .split('&collection=')[1]
+      .split('&searchfield=')[0];
+
+    const searchField = decodedQuery
+      .split('&searchfield=')[1]
+      .split('&searchvalue=')[0];
+
+    const searchValue = decodedQuery
+      .split('&searchvalue=')[1]
+      .split('&outputfieldname=')[0];
+    const outputFieldName = decodedQuery
+      .split('&outputfieldname=')[1]
+      .split('&controlinfo=')[0];
+
+    let CollectionModel: typeof Model;
+
+    switch (collection) {
+      case 'appcollectionfields':
+        CollectionModel = AppCollectionFieldModel;
+        break;
+      case 'products':
+        CollectionModel = ProductModel;
+        break;
+      case 'productmovements':
+        CollectionModel = ProductMovementModel;
+        break;
+      default:
+        CollectionModel = UserModel;
+    }
+
+    const matchObjectPattern =
+      searchField === 'id' || searchField === '_id'
+        ? { _id: new mongoose.Types.ObjectId(searchValue) }
+        : {
+            [searchField]: searchValue,
+          };
+    // $match does not work for field id because ObjectID is stored as 12 binary bytes and regex is a 24-byte string. See https://stackoverflow.com/questions/36193289/moongoose-aggregate-match-does-not-match-ids
+
+    let data = await CollectionModel.aggregate([
+      { $match: matchObjectPattern },
+
+      {
+        $addFields: {
+          inputCollection: collection,
+          inputFieldName: searchField,
+          inputFieldValue: searchValue,
+          outputFieldName,
+          outputFieldValue: '$' + outputFieldName,
+          outputStatus: 'ok',
+        },
+      },
+      {
+        $project: {
+          inputCollection: true,
+          inputFieldName: true,
+          inputFieldValue: true,
+          outputFieldName: true,
+          outputFieldValue: true,
+          outputStatus: true,
+          _id: true,
+          id: true,
+        },
+      },
+    ]);
+
+    if (!data)
+      throw new HTTPError(
+        404,
+        'Impossible to readRecordFieldValue at collection' + collection,
+        'Impossible to readRecordFieldValue at collection' + collection
+      );
+
+    if (data.length === 0) {
+      data = [
+        {
+          inputCollection: collection,
+          inputFieldName: searchField,
+          inputFieldValue: searchValue,
+          outputFieldName,
+          outputFieldValue: 'not found',
+          outputStatus: 'ko',
+        },
+      ];
+    }
+
+    // Defensive result when there is no groupBy results
+
+    return data;
+  }
+
   async groupBy(encodedQuery: string) {
-    debug('Instantiated at constructor at groupBy method');
+    debug('groupBy-method');
     const decodedQuery = decodeURI(encodedQuery);
 
     const collection = decodedQuery
@@ -188,13 +284,14 @@ export class CollectionsMongoRepo {
     }
 
     const searchObjectPattern =
-      searchField === 'id'
-        ? { _id: searchValue }
+      searchField === 'id' || searchField === '_id'
+        ? { _id: new mongoose.Types.ObjectId(searchValue) }
         : {
             [searchField]: { $regex: searchValueRegexPattern },
           };
     // Use [searchKey] expression instead of $searchKey to force aggregate method to identify searchKey as a parameter, not a property.
     // $match does not work with regexp for field id because ObjectID is stored as 12 binary bytes and regex is a 24-byte string
+    // $match does not work for field id because ObjectID is stored as 12 binary bytes and regex is a 24-byte string. See https://stackoverflow.com/questions/36193289/moongoose-aggregate-match-does-not-match-ids
     let data: { _id: string; documents: number; aggregateSumValue: number }[] =
       await CollectionModel.aggregate([
         { $match: searchObjectPattern },
@@ -330,7 +427,7 @@ export class CollectionsMongoRepo {
   }
 
   async groupBySet(encodedQuery: string) {
-    debug('Instantiated at constructor at groupBySet method');
+    debug('groupBySet-method');
     const decodedQuery = decodeURI(encodedQuery);
 
     const collection = decodedQuery
