@@ -71,6 +71,9 @@ export class CollectionsMongoRepo {
       case 'productmovements':
         CollectionModel = ProductMovementModel;
         break;
+      case 'users':
+        CollectionModel = UserModel;
+        break;
       default:
         CollectionModel = UserModel;
     }
@@ -158,6 +161,9 @@ export class CollectionsMongoRepo {
         break;
       case 'productmovements':
         CollectionModel = ProductMovementModel;
+        break;
+      case 'users':
+        CollectionModel = UserModel;
         break;
       default:
         CollectionModel = UserModel;
@@ -260,6 +266,9 @@ export class CollectionsMongoRepo {
         break;
       case 'productmovements':
         CollectionModel = ProductMovementModel;
+        break;
+      case 'users':
+        CollectionModel = UserModel;
         break;
       default:
         CollectionModel = UserModel;
@@ -449,6 +458,9 @@ export class CollectionsMongoRepo {
         break;
       case 'productmovements':
         CollectionModel = ProductMovementModel;
+        break;
+      case 'users':
+        CollectionModel = UserModel;
         break;
       default:
         CollectionModel = UserModel;
