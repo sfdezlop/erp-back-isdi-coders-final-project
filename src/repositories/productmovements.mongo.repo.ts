@@ -2,7 +2,7 @@ import createDebug from 'debug';
 import { ProductMovement } from '../entities/productmovement.entity';
 import { HTTPError } from '../interfaces/error.js';
 import { ProductMovementModel } from './productmovements.mongo.model.js';
-import { stringSeparator } from '../config';
+import { stringSeparator } from '../config.js';
 const debug = createDebug('ERP:repo:productmovements');
 
 export class ProductMovementMongoRepo {
