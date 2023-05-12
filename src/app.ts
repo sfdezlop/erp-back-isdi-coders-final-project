@@ -1,5 +1,5 @@
 import path from 'path';
-import { __dirname } from './config.js';
+import { __dirname, stringSeparator } from './config.js';
 import express, { NextFunction, Request, Response } from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
@@ -55,7 +55,7 @@ export const morganStream = app.use(
         tokens.res(req, res, 'content-length'),
 
         tokens['response-time'](req, res),
-      ].join('_-_'),
+      ].join(stringSeparator),
 
     // To save the log in dist/access.log
     {

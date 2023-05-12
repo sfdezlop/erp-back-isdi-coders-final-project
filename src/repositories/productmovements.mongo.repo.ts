@@ -2,6 +2,7 @@ import createDebug from 'debug';
 import { ProductMovement } from '../entities/productmovement.entity';
 import { HTTPError } from '../interfaces/error.js';
 import { ProductMovementModel } from './productmovements.mongo.model.js';
+import { stringSeparator } from '../config.js';
 const debug = createDebug('ERP:repo:productmovements');
 
 export class ProductMovementMongoRepo {
@@ -302,10 +303,14 @@ export class ProductMovementMongoRepo {
       {
         $addFields: {
           combinedGroupByKey: {
-            $concat: [firstGroupByKey, '_-_', secondGroupByKey],
+            $concat: [firstGroupByKey, stringSeparator, secondGroupByKey],
           },
           combinedGroupByValue: {
-            $concat: ['$' + firstGroupByKey, '_-_', '$' + secondGroupByKey],
+            $concat: [
+              '$' + firstGroupByKey,
+              stringSeparator,
+              '$' + secondGroupByKey,
+            ],
           },
         },
       },
@@ -320,7 +325,7 @@ export class ProductMovementMongoRepo {
       {
         $addFields: {
           combinedGroupByValueArray: {
-            $split: ['$_id', '_-_'],
+            $split: ['$_id', stringSeparator],
           },
         },
       },
