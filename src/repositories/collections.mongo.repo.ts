@@ -5,6 +5,7 @@ import { ProductMovementModel } from './productmovements.mongo.model.js';
 import mongoose, { Model } from 'mongoose';
 import { HTTPError } from '../interfaces/error.js';
 import { AppCollectionFieldModel } from './appcollectionfields.mongo.model.js';
+import { stringSeparator } from '../config.js';
 
 const debug = createDebug('ERP:repo:collections');
 
@@ -316,12 +317,12 @@ export class CollectionsMongoRepo {
         {
           $addFields: {
             combinedGroupByField: {
-              $concat: [firstGroupByField, '_-_', secondGroupByField],
+              $concat: [firstGroupByField, stringSeparator, secondGroupByField],
             },
             combinedGroupByValue: {
               $concat: [
                 '$' + firstGroupByField,
-                '_-_',
+                stringSeparator,
                 '$' + secondGroupByField,
               ],
             },
@@ -342,7 +343,7 @@ export class CollectionsMongoRepo {
         {
           $addFields: {
             combinedGroupByValueArray: {
-              $split: ['$_id', '_-_'],
+              $split: ['$_id', stringSeparator],
             },
           },
         },
@@ -419,7 +420,7 @@ export class CollectionsMongoRepo {
       );
 
     if (data.length === 0) {
-      data = [{ _id: '_-_', documents: 0, aggregateSumValue: 0 }];
+      data = [{ _id: stringSeparator, documents: 0, aggregateSumValue: 0 }];
     }
 
     // Defensive result when there is no groupBy results
