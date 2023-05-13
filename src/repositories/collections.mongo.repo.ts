@@ -65,12 +65,13 @@ export class CollectionsMongoRepo {
       case 'appcollectionfields':
         CollectionModel = AppCollectionFieldModel;
         break;
-      case 'products':
-        CollectionModel = ProductModel;
-        break;
       case 'productmovements':
         CollectionModel = ProductMovementModel;
         break;
+      case 'products':
+        CollectionModel = ProductModel;
+        break;
+
       case 'users':
         CollectionModel = UserModel;
         break;
@@ -100,18 +101,22 @@ export class CollectionsMongoRepo {
     const filterValueObjectPattern =
       filterValue === ''
         ? {}
+        : filterField === 'id' || filterField === '_id'
+        ? {
+            _id: new mongoose.Types.ObjectId(filterValue),
+          }
         : {
             [filterField]: filterValue,
           };
 
     const searchObjectPattern =
-      searchField === 'id'
-        ? { _id: searchValue }
+      searchField === 'id' || searchField === '_id'
+        ? { _id: new mongoose.Types.ObjectId(searchValue) }
         : {
             [searchField]: { $regex: searchValueRegexPattern },
           };
 
-    // Find does not work with regexp for field id because ObjectID is stored as 12 binary bytes and regex is a 24-byte string
+    // Mongoose find method does not work passing arguments string or regexp for field id because ObjectID is stored as 12 binary bytes but strings and regex are 24-byte string
 
     const data = await CollectionModel.find({
       $and: [filterValueObjectPattern, searchObjectPattern],
@@ -156,12 +161,13 @@ export class CollectionsMongoRepo {
       case 'appcollectionfields':
         CollectionModel = AppCollectionFieldModel;
         break;
-      case 'products':
-        CollectionModel = ProductModel;
-        break;
       case 'productmovements':
         CollectionModel = ProductMovementModel;
         break;
+      case 'products':
+        CollectionModel = ProductModel;
+        break;
+
       case 'users':
         CollectionModel = UserModel;
         break;
@@ -261,12 +267,13 @@ export class CollectionsMongoRepo {
       case 'appcollectionfields':
         CollectionModel = AppCollectionFieldModel;
         break;
-      case 'products':
-        CollectionModel = ProductModel;
-        break;
       case 'productmovements':
         CollectionModel = ProductMovementModel;
         break;
+      case 'products':
+        CollectionModel = ProductModel;
+        break;
+
       case 'users':
         CollectionModel = UserModel;
         break;
@@ -320,7 +327,6 @@ export class CollectionsMongoRepo {
             [secondGroupByField]: true,
             [aggregateSumField]: true,
             addedFieldForCountingDocuments: true,
-            // FakeId: true,
           },
         },
         {
@@ -332,6 +338,7 @@ export class CollectionsMongoRepo {
               $concat: [
                 '$' + firstGroupByField,
                 stringSeparator,
+
                 '$' + secondGroupByField,
               ],
             },
@@ -375,28 +382,29 @@ export class CollectionsMongoRepo {
         },
         {
           $addFields: {
-            searchField: [searchField][0],
+            searchField,
+            // SearchField: [searchField][0],
           },
         },
 
         {
           $addFields: {
-            aggregateSumField: [aggregateSumField][0],
+            aggregateSumField,
           },
         },
         {
           $addFields: {
-            searchValue: [searchValue][0],
+            searchValue,
           },
         },
         {
           $addFields: {
-            searchType: [searchType][0],
+            searchType,
           },
         },
         {
           $addFields: {
-            collection: [collection][0],
+            collection,
           },
         },
         {
