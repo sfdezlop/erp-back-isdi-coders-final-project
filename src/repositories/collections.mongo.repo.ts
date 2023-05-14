@@ -6,6 +6,8 @@ import mongoose, { Model } from 'mongoose';
 import { HTTPError } from '../interfaces/error.js';
 import { AppCollectionFieldModel } from './appcollectionfields.mongo.model.js';
 import { stringSeparator } from '../config.js';
+import { Collection } from '../entities/collection.entity.js';
+import { TranslationModel } from './translations.mongo.model.js';
 
 const debug = createDebug('ERP:repo:collections');
 
@@ -71,7 +73,9 @@ export class CollectionsMongoRepo {
       case 'products':
         CollectionModel = ProductModel;
         break;
-
+      case 'translations':
+        CollectionModel = TranslationModel;
+        break;
       case 'users':
         CollectionModel = UserModel;
         break;
@@ -167,7 +171,9 @@ export class CollectionsMongoRepo {
       case 'products':
         CollectionModel = ProductModel;
         break;
-
+      case 'translations':
+        CollectionModel = TranslationModel;
+        break;
       case 'users':
         CollectionModel = UserModel;
         break;
@@ -273,7 +279,9 @@ export class CollectionsMongoRepo {
       case 'products':
         CollectionModel = ProductModel;
         break;
-
+      case 'translations':
+        CollectionModel = TranslationModel;
+        break;
       case 'users':
         CollectionModel = UserModel;
         break;
@@ -467,6 +475,9 @@ export class CollectionsMongoRepo {
       case 'productmovements':
         CollectionModel = ProductMovementModel;
         break;
+      case 'translations':
+        CollectionModel = TranslationModel;
+        break;
       case 'users':
         CollectionModel = UserModel;
         break;
@@ -515,5 +526,41 @@ export class CollectionsMongoRepo {
     const dataSet = data.map((item) => item.set.toString());
 
     return dataSet;
+  }
+
+  async create(
+    encodedQuery: string,
+    newDocument: Partial<Collection>
+  ): Promise<Collection> {
+    debug('create-method');
+    const decodedQuery = decodeURI(encodedQuery);
+
+    const collection = decodedQuery
+      .split('&collection=')[1]
+      .split('&controlinfo=')[0];
+
+    let CollectionModel: typeof Model;
+    switch (collection) {
+      case 'appcollectionfields':
+        CollectionModel = AppCollectionFieldModel;
+        break;
+      case 'products':
+        CollectionModel = ProductModel;
+        break;
+      case 'productmovements':
+        CollectionModel = ProductMovementModel;
+        break;
+      case 'translations':
+        CollectionModel = TranslationModel;
+        break;
+      case 'users':
+        CollectionModel = UserModel;
+        break;
+      default:
+        CollectionModel = UserModel;
+    }
+
+    const data = await CollectionModel.create(newDocument);
+    return data;
   }
 }

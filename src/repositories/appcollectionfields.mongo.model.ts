@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
 import { AppCollectionField } from '../entities/appcollectionfields.entity';
 
-const appCollectionFieldSchema = new Schema<AppCollectionField>({
+export const appCollectionFieldSchema = new Schema<AppCollectionField>({
   collectionName: {
     type: String,
     required: true,

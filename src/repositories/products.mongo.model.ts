@@ -2,7 +2,7 @@ import { Schema, model } from 'mongoose';
 // Import { dbConnect } from '../db/db.connect';
 import { Product } from '../entities/product.entity';
 
-const productSchema = new Schema<Product>({
+export const productSchema = new Schema<Product>({
   sku: {
     type: String,
     required: true,

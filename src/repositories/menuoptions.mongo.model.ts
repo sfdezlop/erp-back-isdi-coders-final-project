@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
 import { MenuOption } from '../entities/menuoption.entity';
 
-const menuOptionSchema = new Schema<MenuOption>({
+export const menuOptionSchema = new Schema<MenuOption>({
   userRole: {
     type: String,
     required: true,

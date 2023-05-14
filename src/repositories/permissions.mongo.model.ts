@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
 import { Permission } from '../entities/permission.entity';
 
-const permissionSchema = new Schema<Permission>({
+export const permissionSchema = new Schema<Permission>({
   userEmail: {
     type: String,
     required: true,

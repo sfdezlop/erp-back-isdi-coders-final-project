@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
 import { ProductMovement } from '../entities/productmovement.entity';
 
-const productMovementSchema = new Schema<ProductMovement>({
+export const productMovementSchema = new Schema<ProductMovement>({
   productSku: {
     type: String,
     required: true,
