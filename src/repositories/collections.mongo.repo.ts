@@ -317,6 +317,7 @@ export class CollectionsMongoRepo {
     // Use [searchKey] expression instead of $searchKey to force aggregate method to identify searchKey as a parameter, not a property.
     // $match does not work with regexp for field id because ObjectID is stored as 12 binary bytes and regex is a 24-byte string
     // $match does not work for field id because ObjectID is stored as 12 binary bytes and regex is a 24-byte string. See https://stackoverflow.com/questions/36193289/moongoose-aggregate-match-does-not-match-ids
+
     let data: { _id: string; documents: number; aggregateSumValue: number }[] =
       await CollectionModel.aggregate([
         { $match: searchObjectPattern },
@@ -391,7 +392,6 @@ export class CollectionsMongoRepo {
         {
           $addFields: {
             searchField,
-            // SearchField: [searchField][0],
           },
         },
 
@@ -561,6 +561,28 @@ export class CollectionsMongoRepo {
     }
 
     const data = await CollectionModel.create(newDocument);
+    return data;
+  }
+
+  async sample() {
+    debug('sample-method');
+    const data = await UserModel.aggregate([
+      {
+        $addFields: {
+          newId: '$firstName',
+        },
+      },
+    ]);
+
+    const data1 = await data.findById('');
+
+    if (!data)
+      throw new HTTPError(
+        404,
+        'Impossible to groupBy at collection',
+        'Impossible to groupBy at collection'
+      );
+
     return data;
   }
 }

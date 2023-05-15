@@ -191,4 +191,33 @@ export class CollectionsController {
       next(error);
     }
   }
+
+  async sample(req: Request, resp: Response, next: NextFunction) {
+    try {
+      debug('sample-method');
+      if (
+        req.headers.authorization === undefined ||
+        !req.headers.authorization.startsWith('Bearer ')
+      )
+        throw new HTTPError(
+          401,
+          'Unauthorized',
+          'A valid token is needed in the authorization header'
+        );
+
+      const data = await this.repo.sample();
+      if (!data)
+        throw new HTTPError(
+          422,
+          'Unprocessable Content',
+          'sample method has not been applied'
+        );
+      resp.status(200);
+      resp.json({
+        results: data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
