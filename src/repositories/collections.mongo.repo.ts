@@ -567,20 +567,15 @@ export class CollectionsMongoRepo {
   async sample() {
     debug('sample-method');
     const data = await UserModel.aggregate([
-      {
-        $addFields: {
-          newId: '$firstName',
-        },
-      },
+      { $addFields: { toStringId: { $toString: '$_id' } } },
+      { $match: { toStringId: '641630973d33d27957edd7b1' } },
     ]);
-
-    const data1 = await data.findById('');
 
     if (!data)
       throw new HTTPError(
         404,
-        'Impossible to groupBy at collection',
-        'Impossible to groupBy at collection'
+        'Impossible to sample at collection',
+        'Impossible to sample at collection'
       );
 
     return data;
