@@ -7,11 +7,11 @@ import { translationSchema } from './translations.mongo.model';
 import { userSchema } from './users.mongo.model';
 
 const collectionSchema = new Schema<Collection>({
-  appcollectionfields: [appCollectionFieldSchema],
-  products: [productSchema],
-  productmovements: [productMovementSchema],
-  translations: [translationSchema],
-  users: [userSchema],
+  appcollectionfields: appCollectionFieldSchema,
+  productmovements: productMovementSchema,
+  products: productSchema,
+  translations: translationSchema,
+  users: userSchema,
 });
 
 translationSchema.set('toJSON', {
