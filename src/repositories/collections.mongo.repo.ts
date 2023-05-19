@@ -1,12 +1,13 @@
 import createDebug from 'debug';
-import { UserModel } from './users.mongo.model.js';
-import { ProductModel } from './products.mongo.model.js';
+import { AppCollectionFieldModel } from './appcollectionfields.mongo.model.js';
 import { ProductMovementModel } from './productmovements.mongo.model.js';
+import { ProductModel } from './products.mongo.model.js';
+import { UserModel } from './users.mongo.model.js';
 import mongoose, { Model } from 'mongoose';
 import { HTTPError } from '../interfaces/error.js';
-import { AppCollectionFieldModel } from './appcollectionfields.mongo.model.js';
+
 import { stringSeparator } from '../config.js';
-import { Collection } from '../entities/collection.entity.js';
+// Import { Collection } from '../entities/collection.entity.js';
 import { TranslationModel } from './translations.mongo.model.js';
 
 const debug = createDebug('ERP:repo:collections');
@@ -528,10 +529,7 @@ export class CollectionsMongoRepo {
     return dataSet;
   }
 
-  async create(
-    encodedQuery: string,
-    newDocument: Partial<Collection>
-  ): Promise<Collection> {
+  async create(encodedQuery: string, newDocument: unknown): Promise<unknown> {
     debug('create-method');
     const decodedQuery = decodeURI(encodedQuery);
 

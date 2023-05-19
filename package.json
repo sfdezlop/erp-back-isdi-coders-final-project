@@ -18,7 +18,7 @@
     "Node",
     "Server"
   ],
-  "author": "Santiago Fernández López",
+  "author": "Santiago Fernández López sfdezlop@mail.com",
   "license": "ISC",
   "devDependencies": {
     "@types/jest": "^29.4.0",

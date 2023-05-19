@@ -1,9 +1,8 @@
 import { UsersController } from './users.controller';
 import { Request, Response, NextFunction } from 'express';
-import { User } from '../entities/user.entity';
-import { Repo } from '../repositories/repo.interface';
 import { Auth } from '../services/auth';
 import { HTTPError } from '../interfaces/error';
+import { UsersMongoRepo } from '../repositories/users.mongo.repo';
 
 jest.mock('../services/auth');
 
@@ -13,7 +12,7 @@ describe('Given the users controller', () => {
     search: jest.fn(),
     query: jest.fn(),
     countRecords: jest.fn(),
-  } as unknown as Repo<User>;
+  } as unknown as UsersMongoRepo;
 
   const controller = new UsersController(repoMock);
 
