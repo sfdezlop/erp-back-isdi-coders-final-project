@@ -33,3 +33,11 @@ collectionsRouter.get(
   logged,
   controller.groupBySet.bind(controller)
 );
+
+collectionsRouter.get('/sample', logged, controller.sample.bind(controller));
+
+collectionsRouter.post(
+  '/create/:id',
+  logged,
+  controller.create.bind(controller)
+);

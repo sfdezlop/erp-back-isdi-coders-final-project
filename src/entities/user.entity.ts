@@ -7,4 +7,5 @@ export type User = {
   role: string;
   image: string;
   lastLogging: string;
+  language: string;
 };

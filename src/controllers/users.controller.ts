@@ -1,12 +1,11 @@
 import { Response, Request, NextFunction } from 'express';
 import createDebug from 'debug';
-import { User } from '../entities/user.entity';
-import { Repo } from '../repositories/repo.interface';
 import { HTTPError } from '../interfaces/error.js';
 import { Auth, PayloadToken } from '../services/auth.js';
+import { UsersMongoRepo } from '../repositories/users.mongo.repo';
 const debug = createDebug('ERP:controller:users');
 export class UsersController {
-  constructor(public repo: Repo<User>) {
+  constructor(public repo: UsersMongoRepo) {
     debug('Instantiate');
   }
 

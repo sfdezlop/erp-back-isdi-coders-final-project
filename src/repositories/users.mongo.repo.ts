@@ -1,11 +1,10 @@
 import createDebug from 'debug';
 import { User } from '../entities/user.entity';
 import { HTTPError } from '../interfaces/error.js';
-import { Repo } from './repo.interface';
 import { UserModel } from './users.mongo.model.js';
 const debug = createDebug('ERP:repo:users');
 
-export class UsersMongoRepo implements Repo<User> {
+export class UsersMongoRepo {
   private static instance: UsersMongoRepo;
 
   public static getInstance(): UsersMongoRepo {

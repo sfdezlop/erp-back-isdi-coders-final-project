@@ -11,6 +11,5 @@ export default {
     'routers',
     'model',
     'src/entities',
-    'src/supermodel',
   ],
 };

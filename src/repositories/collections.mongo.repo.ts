@@ -1,11 +1,14 @@
 import createDebug from 'debug';
-import { UserModel } from './users.mongo.model.js';
-import { ProductModel } from './products.mongo.model.js';
+import { AppCollectionFieldModel } from './appcollectionfields.mongo.model.js';
 import { ProductMovementModel } from './productmovements.mongo.model.js';
+import { ProductModel } from './products.mongo.model.js';
+import { UserModel } from './users.mongo.model.js';
 import mongoose, { Model } from 'mongoose';
 import { HTTPError } from '../interfaces/error.js';
-import { AppCollectionFieldModel } from './appcollectionfields.mongo.model.js';
+
 import { stringSeparator } from '../config.js';
+// Import { Collection } from '../entities/collection.entity.js';
+import { TranslationModel } from './translations.mongo.model.js';
 
 const debug = createDebug('ERP:repo:collections');
 
@@ -65,11 +68,17 @@ export class CollectionsMongoRepo {
       case 'appcollectionfields':
         CollectionModel = AppCollectionFieldModel;
         break;
+      case 'productmovements':
+        CollectionModel = ProductMovementModel;
+        break;
       case 'products':
         CollectionModel = ProductModel;
         break;
-      case 'productmovements':
-        CollectionModel = ProductMovementModel;
+      case 'translations':
+        CollectionModel = TranslationModel;
+        break;
+      case 'users':
+        CollectionModel = UserModel;
         break;
       default:
         CollectionModel = UserModel;
@@ -97,18 +106,22 @@ export class CollectionsMongoRepo {
     const filterValueObjectPattern =
       filterValue === ''
         ? {}
+        : filterField === 'id' || filterField === '_id'
+        ? {
+            _id: new mongoose.Types.ObjectId(filterValue),
+          }
         : {
             [filterField]: filterValue,
           };
 
     const searchObjectPattern =
-      searchField === 'id'
-        ? { _id: searchValue }
+      searchField === 'id' || searchField === '_id'
+        ? { _id: new mongoose.Types.ObjectId(searchValue) }
         : {
             [searchField]: { $regex: searchValueRegexPattern },
           };
 
-    // Find does not work with regexp for field id because ObjectID is stored as 12 binary bytes and regex is a 24-byte string
+    // Mongoose find method does not work passing arguments string or regexp for field id because ObjectID is stored as 12 binary bytes but strings and regex are 24-byte string
 
     const data = await CollectionModel.find({
       $and: [filterValueObjectPattern, searchObjectPattern],
@@ -153,11 +166,17 @@ export class CollectionsMongoRepo {
       case 'appcollectionfields':
         CollectionModel = AppCollectionFieldModel;
         break;
+      case 'productmovements':
+        CollectionModel = ProductMovementModel;
+        break;
       case 'products':
         CollectionModel = ProductModel;
         break;
-      case 'productmovements':
-        CollectionModel = ProductMovementModel;
+      case 'translations':
+        CollectionModel = TranslationModel;
+        break;
+      case 'users':
+        CollectionModel = UserModel;
         break;
       default:
         CollectionModel = UserModel;
@@ -255,11 +274,17 @@ export class CollectionsMongoRepo {
       case 'appcollectionfields':
         CollectionModel = AppCollectionFieldModel;
         break;
+      case 'productmovements':
+        CollectionModel = ProductMovementModel;
+        break;
       case 'products':
         CollectionModel = ProductModel;
         break;
-      case 'productmovements':
-        CollectionModel = ProductMovementModel;
+      case 'translations':
+        CollectionModel = TranslationModel;
+        break;
+      case 'users':
+        CollectionModel = UserModel;
         break;
       default:
         CollectionModel = UserModel;
@@ -293,6 +318,7 @@ export class CollectionsMongoRepo {
     // Use [searchKey] expression instead of $searchKey to force aggregate method to identify searchKey as a parameter, not a property.
     // $match does not work with regexp for field id because ObjectID is stored as 12 binary bytes and regex is a 24-byte string
     // $match does not work for field id because ObjectID is stored as 12 binary bytes and regex is a 24-byte string. See https://stackoverflow.com/questions/36193289/moongoose-aggregate-match-does-not-match-ids
+
     let data: { _id: string; documents: number; aggregateSumValue: number }[] =
       await CollectionModel.aggregate([
         { $match: searchObjectPattern },
@@ -311,7 +337,6 @@ export class CollectionsMongoRepo {
             [secondGroupByField]: true,
             [aggregateSumField]: true,
             addedFieldForCountingDocuments: true,
-            // FakeId: true,
           },
         },
         {
@@ -323,6 +348,7 @@ export class CollectionsMongoRepo {
               $concat: [
                 '$' + firstGroupByField,
                 stringSeparator,
+
                 '$' + secondGroupByField,
               ],
             },
@@ -366,28 +392,28 @@ export class CollectionsMongoRepo {
         },
         {
           $addFields: {
-            searchField: [searchField][0],
+            searchField,
           },
         },
 
         {
           $addFields: {
-            aggregateSumField: [aggregateSumField][0],
+            aggregateSumField,
           },
         },
         {
           $addFields: {
-            searchValue: [searchValue][0],
+            searchValue,
           },
         },
         {
           $addFields: {
-            searchType: [searchType][0],
+            searchType,
           },
         },
         {
           $addFields: {
-            collection: [collection][0],
+            collection,
           },
         },
         {
@@ -450,6 +476,12 @@ export class CollectionsMongoRepo {
       case 'productmovements':
         CollectionModel = ProductMovementModel;
         break;
+      case 'translations':
+        CollectionModel = TranslationModel;
+        break;
+      case 'users':
+        CollectionModel = UserModel;
+        break;
       default:
         CollectionModel = UserModel;
     }
@@ -495,5 +527,55 @@ export class CollectionsMongoRepo {
     const dataSet = data.map((item) => item.set.toString());
 
     return dataSet;
+  }
+
+  async create(encodedQuery: string, newDocument: unknown): Promise<unknown> {
+    debug('create-method');
+    const decodedQuery = decodeURI(encodedQuery);
+
+    const collection = decodedQuery
+      .split('&collection=')[1]
+      .split('&controlinfo=')[0];
+
+    let CollectionModel: typeof Model;
+    switch (collection) {
+      case 'appcollectionfields':
+        CollectionModel = AppCollectionFieldModel;
+        break;
+      case 'products':
+        CollectionModel = ProductModel;
+        break;
+      case 'productmovements':
+        CollectionModel = ProductMovementModel;
+        break;
+      case 'translations':
+        CollectionModel = TranslationModel;
+        break;
+      case 'users':
+        CollectionModel = UserModel;
+        break;
+      default:
+        CollectionModel = UserModel;
+    }
+
+    const data = await CollectionModel.create(newDocument);
+    return data;
+  }
+
+  async sample() {
+    debug('sample-method');
+    const data = await UserModel.aggregate([
+      { $addFields: { toStringId: { $toString: '$_id' } } },
+      { $match: { toStringId: '641630973d33d27957edd7b1' } },
+    ]);
+
+    if (!data)
+      throw new HTTPError(
+        404,
+        'Impossible to sample at collection',
+        'Impossible to sample at collection'
+      );
+
+    return data;
   }
 }

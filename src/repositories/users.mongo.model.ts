@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
 import { User } from '../entities/user.entity';
 
-const userSchema = new Schema<User>({
+export const userSchema = new Schema<User>({
   email: {
     type: String,
     required: true,
@@ -25,6 +25,10 @@ const userSchema = new Schema<User>({
   },
   lastLogging: {
     type: String,
+  },
+  language: {
+    type: String,
+    required: true,
   },
 });
 
