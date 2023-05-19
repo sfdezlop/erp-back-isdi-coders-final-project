@@ -1,5 +1,6 @@
 import createDebug from 'debug';
 import { AppCollectionFieldModel } from './appcollectionfields.mongo.model.js';
+import { BrandModel } from './brands.mongo.model.js';
 import { ProductMovementModel } from './productmovements.mongo.model.js';
 import { ProductModel } from './products.mongo.model.js';
 import { UserModel } from './users.mongo.model.js';
@@ -67,6 +68,9 @@ export class CollectionsMongoRepo {
     switch (collection) {
       case 'appcollectionfields':
         CollectionModel = AppCollectionFieldModel;
+        break;
+      case 'brands':
+        CollectionModel = BrandModel;
         break;
       case 'productmovements':
         CollectionModel = ProductMovementModel;
@@ -165,6 +169,9 @@ export class CollectionsMongoRepo {
     switch (collection) {
       case 'appcollectionfields':
         CollectionModel = AppCollectionFieldModel;
+        break;
+      case 'brands':
+        CollectionModel = BrandModel;
         break;
       case 'productmovements':
         CollectionModel = ProductMovementModel;
@@ -273,6 +280,9 @@ export class CollectionsMongoRepo {
     switch (collection) {
       case 'appcollectionfields':
         CollectionModel = AppCollectionFieldModel;
+        break;
+      case 'brands':
+        CollectionModel = BrandModel;
         break;
       case 'productmovements':
         CollectionModel = ProductMovementModel;
@@ -470,6 +480,9 @@ export class CollectionsMongoRepo {
       case 'appcollectionfields':
         CollectionModel = AppCollectionFieldModel;
         break;
+      case 'brands':
+        CollectionModel = BrandModel;
+        break;
       case 'products':
         CollectionModel = ProductModel;
         break;
@@ -541,6 +554,9 @@ export class CollectionsMongoRepo {
     switch (collection) {
       case 'appcollectionfields':
         CollectionModel = AppCollectionFieldModel;
+        break;
+      case 'brands':
+        CollectionModel = BrandModel;
         break;
       case 'products':
         CollectionModel = ProductModel;
