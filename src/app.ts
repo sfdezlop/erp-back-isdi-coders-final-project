@@ -11,6 +11,7 @@ import { productMovementsRouter } from './routers/productmovements.router.js';
 import fs from 'fs';
 
 import { collectionsRouter } from './routers/collections.router.js';
+import { url } from 'inspector';
 
 const debug = createDebug('ERP:app');
 export const app = express();
@@ -41,25 +42,22 @@ export const morganStream = app.use(
   morgan(
     (tokens, req, res) =>
       [
-        tokens.date(req, res, 'iso'),
-        tokens.userLoggedToken(req, res),
+        JSON.stringify({
+          timeStamp: tokens.date(req, res, 'iso'),
+          userLoggedToken: tokens.userLoggedToken(req, res),
+          userHost: tokens.userHost(req, res),
+          method: tokens.method(req, res),
+          url: tokens.url(req, res),
+          statusCode: tokens.status(req, res),
+          responseLength: tokens.res(req, res, 'content-length'),
+          responseTimeMs: tokens['response-time'](req, res),
+        }),
+        ',',
+      ].join(''),
 
-        tokens.userHost(req, res),
-
-        tokens.method(req, res),
-
-        tokens.url(req, res),
-
-        tokens.status(req, res),
-
-        tokens.res(req, res, 'content-length'),
-
-        tokens['response-time'](req, res),
-      ].join(stringSeparator),
-
-    // To save the log in dist/access.log
+    // To save the log in dist/request.log
     {
-      stream: fs.createWriteStream(path.join(__dirname, 'access.log')),
+      stream: fs.createWriteStream(path.join(__dirname, 'request.log')),
     }
   )
 );
