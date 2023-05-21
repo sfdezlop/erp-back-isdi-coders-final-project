@@ -10,6 +10,11 @@ export const appCollectionFieldSchema = new Schema<AppCollectionField>({
     type: String,
     required: true,
   },
+  fieldType: {
+    type: String,
+    required: true,
+  },
+
   fieldShortDescription: {
     type: String,
     required: true,
@@ -17,14 +22,52 @@ export const appCollectionFieldSchema = new Schema<AppCollectionField>({
   filterable: {
     type: Boolean,
     required: true,
+    default: false,
   },
   searchable: {
     type: Boolean,
     required: true,
+    default: false,
   },
   orderable: {
     type: Boolean,
     required: true,
+    default: false,
+  },
+  htmlTag: {
+    type: String,
+    required: true,
+    default: 'div',
+  },
+  mongoType: {
+    type: String,
+    required: true,
+  },
+  createShow: {
+    type: String,
+    required: true,
+    default: '000',
+  },
+  detailShow: {
+    type: String,
+    required: true,
+    default: '000',
+  },
+  galleryShow: {
+    type: String,
+    required: true,
+    default: '000',
+  },
+
+  updateShow: {
+    type: String,
+    required: true,
+    default: '000',
+  },
+
+  relatedCollectionField: {
+    type: String,
+    default: '',
   },
 });
 
