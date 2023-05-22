@@ -192,6 +192,35 @@ export class CollectionsController {
     }
   }
 
+  async measure(req: Request, resp: Response, next: NextFunction) {
+    try {
+      debug('measure-method');
+      if (
+        req.headers.authorization === undefined ||
+        !req.headers.authorization.startsWith('Bearer ')
+      )
+        throw new HTTPError(
+          401,
+          'Unauthorized',
+          'A valid token is needed in the authorization header'
+        );
+      if (!req.params.id)
+        throw new HTTPError(
+          400,
+          'Bad request',
+          'Query Id needed in the request with information about the measure to calculate'
+        );
+
+      const data = await this.repo.measure(req.path);
+      resp.status(200);
+      resp.json({
+        results: data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async sample(req: Request, resp: Response, next: NextFunction) {
     try {
       debug('sample-method');

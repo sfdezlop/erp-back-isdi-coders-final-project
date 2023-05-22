@@ -34,6 +34,12 @@ collectionsRouter.get(
   controller.groupBySet.bind(controller)
 );
 
+collectionsRouter.get(
+  '/measures/:id',
+  logged,
+  controller.measure.bind(controller)
+);
+
 collectionsRouter.get('/sample', logged, controller.sample.bind(controller));
 
 collectionsRouter.post(

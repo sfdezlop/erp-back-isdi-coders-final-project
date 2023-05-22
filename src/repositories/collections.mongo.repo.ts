@@ -239,7 +239,7 @@ export class CollectionsMongoRepo {
           inputFieldName: searchField,
           inputFieldValue: searchValue,
           outputFieldName,
-          outputFieldValue: 'not found',
+          outputFieldValue: 'Info not found (backend)',
           outputStatus: 'ko',
         },
       ];
@@ -580,6 +580,73 @@ export class CollectionsMongoRepo {
 
     const data = await CollectionModel.create(newDocument);
     return data;
+  }
+
+  async measure(encodedQuery: string): Promise<
+    {
+      _id: string;
+      measure: string;
+      measureValue: number;
+      measureStatus: string;
+    }[]
+  > {
+    debug('measure-method');
+
+    const decodedQuery = decodeURI(encodedQuery);
+
+    const measure = decodedQuery.split('&measure=')[1].split('&filter=')[0];
+
+    const filter = decodedQuery.split('&filter=')[1].split('&controlinfo=')[0];
+
+    switch (measure) {
+      case 'stockunitsbysku': {
+        const data = await ProductMovementModel.aggregate([
+          { $match: { productSku: filter } },
+          {
+            $group: {
+              _id: '$productSku',
+              measureValue: {
+                $sum: '$units',
+              },
+            },
+          },
+          {
+            $addFields: {
+              measure,
+            },
+          },
+
+          {
+            $addFields: {
+              measureStatus: 'calculated',
+            },
+          },
+        ]);
+
+        if (!data) {
+          return [
+            {
+              _id: filter,
+              measure,
+              measureValue: 0,
+              measureStatus: 'sku ' + filter + ' not found in stockUnitsBySku',
+            },
+          ];
+        }
+
+        return data[0];
+      }
+
+      default:
+        return [
+          {
+            _id: filter,
+            measure,
+            measureValue: 0,
+            measureStatus: 'measure ' + measure + ' is not implemented',
+          },
+        ];
+    }
   }
 
   async sample() {
