@@ -65,7 +65,7 @@ export const appCollectionFieldSchema = new Schema<AppCollectionField>({
     default: '000',
   },
 
-  relatedCollectionField: {
+  relatedInfo: {
     type: String,
     default: '',
   },

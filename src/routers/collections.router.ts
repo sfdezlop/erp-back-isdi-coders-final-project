@@ -14,15 +14,17 @@ const repo = CollectionsMongoRepo.getInstance();
 const controller = new CollectionsController(repo);
 
 collectionsRouter.get(
-  '/readrecords/:id',
+  '/calculations/:id',
   logged,
-  controller.readRecords.bind(controller)
+  controller.calculate.bind(controller)
 );
-collectionsRouter.get(
-  '/readrecordfieldvalue/:id',
+
+collectionsRouter.post(
+  '/create/:id',
   logged,
-  controller.readRecordFieldValue.bind(controller)
+  controller.create.bind(controller)
 );
+
 collectionsRouter.get(
   '/groupby/:id',
   logged,
@@ -39,11 +41,14 @@ collectionsRouter.get(
   logged,
   controller.measure.bind(controller)
 );
-
-collectionsRouter.get('/sample', logged, controller.sample.bind(controller));
-
-collectionsRouter.post(
-  '/create/:id',
+collectionsRouter.get(
+  '/readrecordfieldvalue/:id',
   logged,
-  controller.create.bind(controller)
+  controller.readRecordFieldValue.bind(controller)
 );
+collectionsRouter.get(
+  '/readrecords/:id',
+  logged,
+  controller.readRecords.bind(controller)
+);
+collectionsRouter.get('/sample', logged, controller.sample.bind(controller));

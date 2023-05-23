@@ -13,5 +13,5 @@ export type AppCollectionField = {
   detailShow: string;
   galleryShow: string;
   updateShow: string;
-  relatedCollectionField: string;
+  relatedInfo: string;
 };
