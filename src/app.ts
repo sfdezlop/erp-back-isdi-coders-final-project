@@ -1,5 +1,5 @@
 import path from 'path';
-import { __dirname, stringSeparator } from './config.js';
+import { __dirname } from './config.js';
 import express, { NextFunction, Request, Response } from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
@@ -9,9 +9,7 @@ import { CustomError } from './interfaces/error.js';
 import { productsRouter } from './routers/products.router.js';
 import { productMovementsRouter } from './routers/productmovements.router.js';
 import fs from 'fs';
-
 import { collectionsRouter } from './routers/collections.router.js';
-import { url } from 'inspector';
 
 const debug = createDebug('ERP:app');
 export const app = express();
@@ -26,7 +24,7 @@ app.use(morgan('dev'));
 // Morgan allows you to create your own tokens with the .token() method
 // See node_modules\morgan\index.js
 
-morgan.token('userLoggedToken', (req, res) =>
+morgan.token('userLoggedToken', (req, _res) =>
   req.headers.authorization === undefined
     ? 'No Token'
     : req.headers.authorization
@@ -34,7 +32,7 @@ morgan.token('userLoggedToken', (req, res) =>
 
 morgan.token(
   'userHost',
-  (req, res) => req.headers.host ?? 'No host'
+  (req, _res) => req.headers.host ?? 'No host'
   // Nullish coalescing operator: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Nullish_coalescing
 );
 
@@ -86,7 +84,7 @@ app.get('/', (_req, resp) => {
 
 app.use(
   (error: CustomError, _req: Request, resp: Response, _next: NextFunction) => {
-    debug('Middleware de errores');
+    debug('Middleware of errors');
     const status = error.statusCode || 500;
     const statusMessage =
       error.statusMessage || 'Internal server error (default server message)';
