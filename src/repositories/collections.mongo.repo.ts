@@ -72,6 +72,8 @@ export class CollectionsMongoRepo {
         CollectionModel = ProductModel;
     }
 
+    const matchObjectPattern = { _id: new mongoose.Types.ObjectId(documentId) };
+
     let mongooseOperator: string;
     switch (operation) {
       case 'addition':
@@ -86,11 +88,123 @@ export class CollectionsMongoRepo {
       case 'division':
         mongooseOperator = '$divide';
         break;
+      case 'percentageoversecondoperand': {
+        const data = await CollectionModel.aggregate([
+          { $match: matchObjectPattern },
+          {
+            $project: {
+              [firstOperandField]: true,
+              [secondOperandField]: true,
+            },
+          },
+          {
+            $addFields: {
+              collection,
+              documentId,
+              operation,
+              firstOperandField,
+              secondOperandField,
+              provisionalResult1: {
+                $subtract: [
+                  '$' + [firstOperandField],
+                  '$' + [secondOperandField],
+                ],
+              },
+              resultStatus: 'calculated',
+            },
+          },
+          {
+            $addFields: {
+              provisionalResult2: {
+                $divide: ['$provisionalResult1', '$' + [secondOperandField]],
+              },
+            },
+          },
+          {
+            $addFields: {
+              result: {
+                $multiply: ['$provisionalResult2', 100],
+              },
+            },
+          },
+        ]);
+        if (!data || data.length === 0) {
+          return [
+            {
+              collection,
+              documentId,
+              operation,
+              firstOperandField,
+              secondOperandField,
+              result: 'not available',
+              resultStatus: 'not available',
+            },
+          ];
+        }
+
+        return [data[0]];
+      }
+
+      case 'percentageoverfirstoperand': {
+        const data = await CollectionModel.aggregate([
+          { $match: matchObjectPattern },
+          {
+            $project: {
+              [firstOperandField]: true,
+              [secondOperandField]: true,
+            },
+          },
+          {
+            $addFields: {
+              collection,
+              documentId,
+              operation,
+              firstOperandField,
+              secondOperandField,
+              provisionalResult1: {
+                $subtract: [
+                  '$' + [firstOperandField],
+                  '$' + [secondOperandField],
+                ],
+              },
+              resultStatus: 'calculated',
+            },
+          },
+          {
+            $addFields: {
+              provisionalResult2: {
+                $divide: ['$provisionalResult1', '$' + [firstOperandField]],
+              },
+            },
+          },
+          {
+            $addFields: {
+              result: {
+                $multiply: ['$provisionalResult2', 100],
+              },
+            },
+          },
+        ]);
+        if (!data || data.length === 0) {
+          return [
+            {
+              collection,
+              documentId,
+              operation,
+              firstOperandField,
+              secondOperandField,
+              result: 'not available',
+              resultStatus: 'not available',
+            },
+          ];
+        }
+
+        return [data[0]];
+      }
+
       default:
         mongooseOperator = '$';
     }
-
-    const matchObjectPattern = { _id: new mongoose.Types.ObjectId(documentId) };
 
     const data = await CollectionModel.aggregate([
       { $match: matchObjectPattern },
@@ -657,7 +771,7 @@ export class CollectionsMongoRepo {
               filterValue,
               setName: 'sku',
               setLabel: filterValue,
-              setData: 'not found (backend)',
+              setData: '0 (no product movements)',
               setStatus: filterName + '=' + filterValue + ' not found',
             },
           ];
