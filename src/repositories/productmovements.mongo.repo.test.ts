@@ -149,6 +149,7 @@ describe('Given a new ProductMovementMongoRepo created with a public static func
       expect(ProductMovementModel.aggregate).toHaveBeenCalled();
     });
   });
+
   describe('When we call the countRecords method', () => {
     test('Then the mongoose countDocuments is called an it should return the mocked record', async () => {
       const mockResult = { id: '10' };
@@ -164,17 +165,33 @@ describe('Given a new ProductMovementMongoRepo created with a public static func
 
   describe('When we call the stockBySku method', () => {
     test('Then the mongoose aggregate is called an it should return the mocked record', async () => {
-      const mockResult = 1;
+      const mockResult = [{ _id: '10', stock: 1 }];
       (ProductMovementModel.aggregate as jest.Mock).mockImplementation(() =>
         mockExecFunction(mockResult)
       );
       const result = await instanceOfProductMovementsMongoRepo.stockBySku('10');
       mongoose.disconnect();
       expect(ProductMovementModel.aggregate).toHaveBeenCalled();
-      expect(result).toEqual(mockResult);
+      expect(result).toEqual(mockResult[0].stock);
     });
   });
 
+  describe('When we use the microserviceStockGroupByKeysFilteredByKeyValue method', () => {
+    test('Then the mongoose aggregate method is called', async () => {
+      (ProductMovementModel.aggregate as jest.Mock).mockImplementation(() =>
+        mockExecFunction({})
+      );
+      await instanceOfProductMovementsMongoRepo.microserviceStockGroupByKeysFilteredByKeyValue(
+        'firstGroupByKey',
+        'secondGroupByKey',
+        'filterKey',
+        'filterValue'
+      );
+      mongoose.disconnect();
+
+      expect(ProductMovementModel.aggregate).toHaveBeenCalled();
+    });
+  });
   describe('When we call the stock method', () => {
     test('Then the mongoose aggregate is called an it should return the mocked record', async () => {
       const mockResult = { id: 1 };
