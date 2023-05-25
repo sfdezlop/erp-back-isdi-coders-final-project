@@ -1,14 +1,14 @@
 import createDebug from 'debug';
 import { AppCollectionFieldModel } from './appcollectionfields.mongo.model.js';
+import { BrandModel } from './brands.mongo.model.js';
 import { ProductMovementModel } from './productmovements.mongo.model.js';
 import { ProductModel } from './products.mongo.model.js';
 import { UserModel } from './users.mongo.model.js';
 import mongoose, { Model } from 'mongoose';
 import { HTTPError } from '../interfaces/error.js';
-
 import { stringSeparator } from '../config.js';
-// Import { Collection } from '../entities/collection.entity.js';
 import { TranslationModel } from './translations.mongo.model.js';
+import { RequestLogModel } from './requestlog.mongo.model.js';
 
 const debug = createDebug('ERP:repo:collections');
 
@@ -25,6 +25,265 @@ export class CollectionsMongoRepo {
 
   private constructor() {
     debug('Instantiated at constructor');
+  }
+
+  async calculate(encodedQuery: string): Promise<
+    {
+      collection: string;
+      documentId: string;
+      operation: string;
+      firstOperandField: string;
+      secondOperandField: string;
+      result: string;
+      resultStatus: string;
+    }[]
+  > {
+    debug('calculate-method');
+
+    const decodedQuery = decodeURI(encodedQuery);
+
+    const collection = decodedQuery
+      .split('&collection=')[1]
+      .split('&documentid=')[0];
+    const documentId = decodedQuery
+      .split('&documentid=')[1]
+      .split('&operation=')[0];
+    const operation = decodedQuery
+      .split('&operation=')[1]
+      .split('&firstoperandfield=')[0];
+    const firstOperandField = decodedQuery
+      .split('&firstoperandfield=')[1]
+      .split('&secondtoperandfield=')[0];
+    const secondOperandField = decodedQuery
+      .split('&secondtoperandfield=')[1]
+      .split('&controlinfo=')[0];
+
+    let CollectionModel: typeof Model;
+    switch (collection) {
+      case 'products':
+        CollectionModel = ProductModel;
+        break;
+      case 'productmovements':
+        CollectionModel = ProductMovementModel;
+        break;
+      default:
+        CollectionModel = ProductModel;
+    }
+
+    const matchObjectPattern = { _id: new mongoose.Types.ObjectId(documentId) };
+
+    let mongooseOperator: string;
+    switch (operation) {
+      case 'addition':
+        mongooseOperator = '$add';
+        break;
+      case 'subtraction':
+        mongooseOperator = '$subtract';
+        break;
+      case 'multiplication':
+        mongooseOperator = '$multiply';
+        break;
+      case 'division':
+        mongooseOperator = '$divide';
+        break;
+      case 'percentageoversecondoperand': {
+        const data = await CollectionModel.aggregate([
+          { $match: matchObjectPattern },
+          {
+            $project: {
+              [firstOperandField]: true,
+              [secondOperandField]: true,
+            },
+          },
+          {
+            $addFields: {
+              collection,
+              documentId,
+              operation,
+              firstOperandField,
+              secondOperandField,
+              provisionalResult1: {
+                $subtract: [
+                  '$' + [firstOperandField],
+                  '$' + [secondOperandField],
+                ],
+              },
+              resultStatus: 'calculated',
+            },
+          },
+          {
+            $addFields: {
+              provisionalResult2: {
+                $divide: ['$provisionalResult1', '$' + [secondOperandField]],
+              },
+            },
+          },
+          {
+            $addFields: {
+              result: {
+                $multiply: ['$provisionalResult2', 100],
+              },
+            },
+          },
+        ]);
+        if (!data || data.length === 0) {
+          return [
+            {
+              collection,
+              documentId,
+              operation,
+              firstOperandField,
+              secondOperandField,
+              result: 'not available',
+              resultStatus: 'not available',
+            },
+          ];
+        }
+
+        return [data[0]];
+      }
+
+      case 'percentageoverfirstoperand': {
+        const data = await CollectionModel.aggregate([
+          { $match: matchObjectPattern },
+          {
+            $project: {
+              [firstOperandField]: true,
+              [secondOperandField]: true,
+            },
+          },
+          {
+            $addFields: {
+              collection,
+              documentId,
+              operation,
+              firstOperandField,
+              secondOperandField,
+              provisionalResult1: {
+                $subtract: [
+                  '$' + [firstOperandField],
+                  '$' + [secondOperandField],
+                ],
+              },
+              resultStatus: 'calculated',
+            },
+          },
+          {
+            $addFields: {
+              provisionalResult2: {
+                $divide: ['$provisionalResult1', '$' + [firstOperandField]],
+              },
+            },
+          },
+          {
+            $addFields: {
+              result: {
+                $multiply: ['$provisionalResult2', 100],
+              },
+            },
+          },
+        ]);
+        if (!data || data.length === 0) {
+          return [
+            {
+              collection,
+              documentId,
+              operation,
+              firstOperandField,
+              secondOperandField,
+              result: 'not available',
+              resultStatus: 'not available',
+            },
+          ];
+        }
+
+        return [data[0]];
+      }
+
+      default:
+        mongooseOperator = '$';
+    }
+
+    const data = await CollectionModel.aggregate([
+      { $match: matchObjectPattern },
+      {
+        $project: {
+          [firstOperandField]: true,
+          [secondOperandField]: true,
+        },
+      },
+      {
+        $addFields: {
+          collection,
+          documentId,
+          operation,
+          firstOperandField,
+          secondOperandField,
+          result: {
+            [mongooseOperator]: [
+              '$' + [firstOperandField],
+              '$' + [secondOperandField],
+            ],
+          },
+          resultStatus: 'calculated',
+        },
+      },
+    ]);
+
+    if (!data || data.length === 0) {
+      return [
+        {
+          collection,
+          documentId,
+          operation,
+          firstOperandField,
+          secondOperandField,
+          result: 'not available',
+          resultStatus: 'not available',
+        },
+      ];
+    }
+
+    return [data[0]];
+  }
+
+  async create(encodedQuery: string, newDocument: unknown): Promise<unknown> {
+    debug('create-method');
+    const decodedQuery = decodeURI(encodedQuery);
+
+    const collection = decodedQuery
+      .split('&collection=')[1]
+      .split('&controlinfo=')[0];
+
+    let CollectionModel: typeof Model;
+    switch (collection) {
+      case 'appcollectionfields':
+        CollectionModel = AppCollectionFieldModel;
+        break;
+      case 'brands':
+        CollectionModel = BrandModel;
+        break;
+      case 'products':
+        CollectionModel = ProductModel;
+        break;
+      case 'productmovements':
+        CollectionModel = ProductMovementModel;
+        break;
+      case 'requestlogs':
+        CollectionModel = RequestLogModel;
+        break;
+      case 'translations':
+        CollectionModel = TranslationModel;
+        break;
+      case 'users':
+        CollectionModel = UserModel;
+        break;
+      default:
+        CollectionModel = UserModel;
+    }
+
+    const data = await CollectionModel.create(newDocument);
+    return data;
   }
 
   async readRecords(encodedQuery: string) {
@@ -67,6 +326,9 @@ export class CollectionsMongoRepo {
     switch (collection) {
       case 'appcollectionfields':
         CollectionModel = AppCollectionFieldModel;
+        break;
+      case 'brands':
+        CollectionModel = BrandModel;
         break;
       case 'productmovements':
         CollectionModel = ProductMovementModel;
@@ -140,108 +402,6 @@ export class CollectionsMongoRepo {
     return data;
   }
 
-  async readRecordFieldValue(encodedQuery: string): Promise<unknown[]> {
-    debug('readRecordFieldValue-method');
-
-    const decodedQuery = decodeURI(encodedQuery);
-
-    const collection = decodedQuery
-      .split('&collection=')[1]
-      .split('&searchfield=')[0];
-
-    const searchField = decodedQuery
-      .split('&searchfield=')[1]
-      .split('&searchvalue=')[0];
-
-    const searchValue = decodedQuery
-      .split('&searchvalue=')[1]
-      .split('&outputfieldname=')[0];
-    const outputFieldName = decodedQuery
-      .split('&outputfieldname=')[1]
-      .split('&controlinfo=')[0];
-
-    let CollectionModel: typeof Model;
-
-    switch (collection) {
-      case 'appcollectionfields':
-        CollectionModel = AppCollectionFieldModel;
-        break;
-      case 'productmovements':
-        CollectionModel = ProductMovementModel;
-        break;
-      case 'products':
-        CollectionModel = ProductModel;
-        break;
-      case 'translations':
-        CollectionModel = TranslationModel;
-        break;
-      case 'users':
-        CollectionModel = UserModel;
-        break;
-      default:
-        CollectionModel = UserModel;
-    }
-
-    const matchObjectPattern =
-      searchField === 'id' || searchField === '_id'
-        ? { _id: new mongoose.Types.ObjectId(searchValue) }
-        : {
-            [searchField]: searchValue,
-          };
-    // $match does not work for field id because ObjectID is stored as 12 binary bytes and regex is a 24-byte string. See https://stackoverflow.com/questions/36193289/moongoose-aggregate-match-does-not-match-ids
-
-    let data = await CollectionModel.aggregate([
-      { $match: matchObjectPattern },
-
-      {
-        $addFields: {
-          inputCollection: collection,
-          inputFieldName: searchField,
-          inputFieldValue: searchValue,
-          outputFieldName,
-          outputFieldValue: '$' + outputFieldName,
-          outputStatus: 'ok',
-        },
-      },
-      {
-        $project: {
-          inputCollection: true,
-          inputFieldName: true,
-          inputFieldValue: true,
-          outputFieldName: true,
-          outputFieldValue: true,
-          outputStatus: true,
-          _id: true,
-          id: true,
-        },
-      },
-    ]);
-
-    if (!data)
-      throw new HTTPError(
-        404,
-        'Impossible to readRecordFieldValue at collection' + collection,
-        'Impossible to readRecordFieldValue at collection' + collection
-      );
-
-    if (data.length === 0) {
-      data = [
-        {
-          inputCollection: collection,
-          inputFieldName: searchField,
-          inputFieldValue: searchValue,
-          outputFieldName,
-          outputFieldValue: 'not found',
-          outputStatus: 'ko',
-        },
-      ];
-    }
-
-    // Defensive result when there is no groupBy results
-
-    return data;
-  }
-
   async groupBy(encodedQuery: string) {
     debug('groupBy-method');
     const decodedQuery = decodeURI(encodedQuery);
@@ -273,6 +433,9 @@ export class CollectionsMongoRepo {
     switch (collection) {
       case 'appcollectionfields':
         CollectionModel = AppCollectionFieldModel;
+        break;
+      case 'brands':
+        CollectionModel = BrandModel;
         break;
       case 'productmovements':
         CollectionModel = ProductMovementModel;
@@ -470,6 +633,9 @@ export class CollectionsMongoRepo {
       case 'appcollectionfields':
         CollectionModel = AppCollectionFieldModel;
         break;
+      case 'brands':
+        CollectionModel = BrandModel;
+        break;
       case 'products':
         CollectionModel = ProductModel;
         break;
@@ -529,24 +695,139 @@ export class CollectionsMongoRepo {
     return dataSet;
   }
 
-  async create(encodedQuery: string, newDocument: unknown): Promise<unknown> {
-    debug('create-method');
+  async measure(encodedQuery: string): Promise<
+    {
+      measure: string;
+      measureDescription: string;
+      filterName: string;
+      filterValue: string;
+      setName: string;
+      setLabel: string;
+      setData: string;
+      setStatus: string;
+    }[]
+  > {
+    debug('measure-method');
+
+    const decodedQuery = decodeURI(encodedQuery);
+
+    const measure = decodedQuery.split('&measure=')[1].split('&filtername=')[0];
+    const filterName = decodedQuery
+      .split('&filtername=')[1]
+      .split('&filtervalue=')[0];
+
+    const filterValue = decodedQuery
+      .split('&filtervalue=')[1]
+      .split('&controlinfo=')[0];
+
+    switch (measure) {
+      case 'productstockunitsbysku': {
+        const data = await ProductMovementModel.aggregate([
+          { $match: { [filterName]: filterValue } },
+          {
+            $group: {
+              _id: '$' + filterName,
+              setData: {
+                $sum: '$units',
+              },
+            },
+          },
+          {
+            $addFields: {
+              measure,
+            },
+          },
+          {
+            $addFields: {
+              measureDescription: 'stock of product by sku, measured in units',
+            },
+          },
+
+          {
+            $addFields: {
+              setName: 'sku',
+            },
+          },
+          {
+            $addFields: {
+              setLabel: '$_id',
+            },
+          },
+          {
+            $addFields: {
+              setStatus: 'calculated',
+            },
+          },
+        ]);
+
+        if (!data || data.length === 0) {
+          return [
+            {
+              measure,
+              measureDescription: 'stock of product by sku, measured in units',
+              filterName,
+              filterValue,
+              setName: 'sku',
+              setLabel: filterValue,
+              setData: '0 (no product movements)',
+              setStatus: filterName + '=' + filterValue + ' not found',
+            },
+          ];
+        }
+
+        return [data[0]];
+      }
+
+      default:
+        return [
+          {
+            measure,
+            measureDescription: 'measure ' + measure + ' is not implemented',
+            filterName,
+            filterValue,
+            setName: 'setName is not defined',
+            setLabel: 'setLabel is not defined',
+            setData: 'not found (backend)',
+            setStatus: 'measure ' + measure + ' is not implemented',
+          },
+        ];
+    }
+  }
+
+  async readRecordFieldValue(encodedQuery: string): Promise<unknown[]> {
+    debug('readRecordFieldValue-method');
+
     const decodedQuery = decodeURI(encodedQuery);
 
     const collection = decodedQuery
       .split('&collection=')[1]
+      .split('&searchfield=')[0];
+
+    const searchField = decodedQuery
+      .split('&searchfield=')[1]
+      .split('&searchvalue=')[0];
+
+    const searchValue = decodedQuery
+      .split('&searchvalue=')[1]
+      .split('&outputfieldname=')[0];
+    const outputFieldName = decodedQuery
+      .split('&outputfieldname=')[1]
       .split('&controlinfo=')[0];
 
     let CollectionModel: typeof Model;
+
     switch (collection) {
       case 'appcollectionfields':
         CollectionModel = AppCollectionFieldModel;
         break;
-      case 'products':
-        CollectionModel = ProductModel;
+      case 'brands':
+        CollectionModel = BrandModel;
         break;
       case 'productmovements':
         CollectionModel = ProductMovementModel;
+        break;
+      case 'products':
+        CollectionModel = ProductModel;
         break;
       case 'translations':
         CollectionModel = TranslationModel;
@@ -558,7 +839,63 @@ export class CollectionsMongoRepo {
         CollectionModel = UserModel;
     }
 
-    const data = await CollectionModel.create(newDocument);
+    const matchObjectPattern =
+      searchField === 'id' || searchField === '_id'
+        ? { _id: new mongoose.Types.ObjectId(searchValue) }
+        : {
+            [searchField]: searchValue,
+          };
+    // $match does not work for field id because ObjectID is stored as 12 binary bytes and regex is a 24-byte string. See https://stackoverflow.com/questions/36193289/moongoose-aggregate-match-does-not-match-ids
+
+    let data = await CollectionModel.aggregate([
+      { $match: matchObjectPattern },
+
+      {
+        $addFields: {
+          inputCollection: collection,
+          inputFieldName: searchField,
+          inputFieldValue: searchValue,
+          outputFieldName,
+          outputFieldValue: '$' + outputFieldName,
+          outputStatus: 'ok',
+        },
+      },
+      {
+        $project: {
+          inputCollection: true,
+          inputFieldName: true,
+          inputFieldValue: true,
+          outputFieldName: true,
+          outputFieldValue: true,
+          outputStatus: true,
+          _id: true,
+          id: true,
+        },
+      },
+    ]);
+
+    if (!data)
+      throw new HTTPError(
+        404,
+        'Impossible to readRecordFieldValue at collection' + collection,
+        'Impossible to readRecordFieldValue at collection' + collection
+      );
+
+    if (data.length === 0) {
+      data = [
+        {
+          inputCollection: collection,
+          inputFieldName: searchField,
+          inputFieldValue: searchValue,
+          outputFieldName,
+          outputFieldValue: 'Info not found (backend)',
+          outputStatus: 'ko',
+        },
+      ];
+    }
+
+    // Defensive result when there is no groupBy results
+
     return data;
   }
 
