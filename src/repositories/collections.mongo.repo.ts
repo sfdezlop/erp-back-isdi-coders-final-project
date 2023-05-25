@@ -6,9 +6,7 @@ import { ProductModel } from './products.mongo.model.js';
 import { UserModel } from './users.mongo.model.js';
 import mongoose, { Model } from 'mongoose';
 import { HTTPError } from '../interfaces/error.js';
-
 import { stringSeparator } from '../config.js';
-// Import { Collection } from '../entities/collection.entity.js';
 import { TranslationModel } from './translations.mongo.model.js';
 import { RequestLogModel } from './requestlog.mongo.model.js';
 
