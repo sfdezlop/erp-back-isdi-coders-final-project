@@ -1,5 +1,5 @@
 import path from 'path';
-import { __dirname } from './config.js';
+// Import { __dirname } from './config.js';
 import express, { NextFunction, Request, Response } from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
@@ -24,10 +24,9 @@ app.use(morgan('dev'));
 // Morgan allows you to create your own tokens with the .token() method
 // See node_modules\morgan\index.js
 
-morgan.token('userLoggedToken', (req, _res) =>
-  req.headers.authorization === undefined
-    ? 'No Token'
-    : req.headers.authorization
+morgan.token(
+  'userLoggedToken',
+  (req, _res) => req.headers.authorization ?? 'No Token'
 );
 
 morgan.token(
@@ -55,7 +54,8 @@ export const morganStream = app.use(
 
     // To save the log in dist/request.log
     {
-      stream: fs.createWriteStream(path.join(__dirname, 'request.log')),
+      stream: fs.createWriteStream('request.log'),
+      // With relative reference: stream: fs.createWriteStream(path.join(__dirname, 'request.log')),
     }
   )
 );
@@ -63,7 +63,7 @@ export const morganStream = app.use(
 app.use(express.json());
 app.use(cors(corsOptions));
 
-// Code to be implemented for statics content
+// Code to be implemented for statics content. It does not work for testing
 // debug({ __dirname });
 // app.use(express.static(path.resolve(__dirname, 'public')));
 app.use('/productmovements', productMovementsRouter);

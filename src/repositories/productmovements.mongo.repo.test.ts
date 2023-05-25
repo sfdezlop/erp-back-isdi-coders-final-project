@@ -77,13 +77,12 @@ describe('Given a new ProductMovementMongoRepo created with a public static func
       );
       // Even if the destroy method is using .exec() to transform the mongoose pseudopromise in a promise, the mocked method works
       const mockId = '1';
-      mongoose.disconnect();
 
-      expect(() =>
+      await expect(() =>
         instanceOfProductMovementsMongoRepo.deleteById(mockId)
       ).rejects.toThrow();
-      expect(ProductMovementModel.findByIdAndDelete).toHaveBeenCalled();
-
+      await expect(ProductMovementModel.findByIdAndDelete).toHaveBeenCalled();
+      mongoose.disconnect();
       // When the order of the expects are different, the test does not work
     });
   });

@@ -361,8 +361,7 @@ export class CollectionsMongoRepo {
         searchValueRegexPattern = new RegExp(`${searchValue}`);
         break;
       default:
-        // eslint-disable-next-line prefer-regex-literals
-        searchValueRegexPattern = new RegExp(`.*.`);
+        searchValueRegexPattern = new RegExp(`${searchValue}`);
     }
 
     const filterValueObjectPattern =
@@ -468,8 +467,7 @@ export class CollectionsMongoRepo {
         searchValueRegexPattern = new RegExp(`${searchValue}`);
         break;
       default:
-        // eslint-disable-next-line prefer-regex-literals
-        searchValueRegexPattern = new RegExp(`.*.`);
+        searchValueRegexPattern = new RegExp(`${searchValue}`);
     }
 
     const searchObjectPattern =

@@ -12,7 +12,8 @@ export const config = {
   JWT_SECRET: process.env.JWT_SECRET,
 };
 
-export const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// Eliminated because testing does not work:
+// export const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const stringSeparator = '_-_';
 // Used to separate string in order to distinguish fields in certain parts of code.
