@@ -1,8 +1,5 @@
 import { CollectionsMongoRepo } from './collections.mongo.repo.js';
-// Import { CollectionsModel } from './collections.mongo.model.js';
 import mongoose, { Model } from 'mongoose';
-
-// Jest.mock('./productmovements.mongo.model.js');
 
 const mockExecFunction = (mockValue: unknown) => ({
   exec: jest.fn().mockResolvedValue(mockValue),
@@ -26,7 +23,7 @@ describe('Given a new CollectionsMongoRepo created with a public static function
         mockExecFunction(mockResult)
       );
       const result = await instanceOfCollectionsMongoRepo.calculate('mock');
-      mongoose.disconnect();
+      await mongoose.disconnect();
       expect(CollectionModel.aggregate).toHaveBeenCalled();
       expect(result).toEqual(mockResult);
     });
