@@ -13,7 +13,7 @@ export const config = {
 };
 
 // Eliminated because testing does not work:
-// export const __dirname = path.dirname(fileURLToPath(import.meta.url));
+export const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const stringSeparator = '_-_';
 // Used to separate string in order to distinguish fields in certain parts of code.

@@ -1,5 +1,5 @@
 import path from 'path';
-// Import { __dirname } from './config.js';
+import { __dirname } from './config.js';
 import express, { NextFunction, Request, Response } from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
@@ -54,8 +54,8 @@ export const morganStream = app.use(
 
     // To save the log in dist/request.log
     {
-      stream: fs.createWriteStream('request.log'),
-      // With relative reference: stream: fs.createWriteStream(path.join(__dirname, 'request.log')),
+      // With non relative reference: stream: fs.createWriteStream('request.log'),
+      stream: fs.createWriteStream(path.join(__dirname, 'request.log')),
     }
   )
 );

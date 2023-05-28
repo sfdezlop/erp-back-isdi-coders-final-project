@@ -41,14 +41,11 @@ collectionsRouter.get(
   logged,
   controller.measure.bind(controller)
 );
-collectionsRouter.get(
-  '/readrecordfieldvalue/:id',
-  logged,
-  controller.readRecordFieldValue.bind(controller)
-);
+
 collectionsRouter.get(
   '/readrecords/:id',
   logged,
   controller.readRecords.bind(controller)
 );
 collectionsRouter.get('/sample', logged, controller.sample.bind(controller));
+collectionsRouter.get('/views/:id', logged, controller.view.bind(controller));
