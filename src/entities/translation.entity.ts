@@ -6,5 +6,6 @@ export type TranslationOutputText = {
 export type Translation = {
   id: string;
   inputText: string;
+  inputContext: string;
   outputTexts: TranslationOutputText[];
 };
