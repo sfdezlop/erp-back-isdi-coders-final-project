@@ -268,15 +268,20 @@ export class ProductMovementsController {
   ) {
     try {
       debug('microserviceStockGroupByKeysFilteredByKeyValue-method');
-      if (
-        !req.headers.authorization ||
-        !req.headers.authorization.startsWith('Bearer ')
-      )
+      if (!req.headers.authorization)
         throw new HTTPError(
           401,
           'Unauthorized',
           'A token is needed in the authorization header'
         );
+
+      if (!req.headers.authorization.startsWith('Bearer '))
+        throw new HTTPError(
+          401,
+          'Unauthorized',
+          'A Bearer token is needed in the authorization header'
+        );
+
       if (!req.params.path)
         throw new HTTPError(
           400,

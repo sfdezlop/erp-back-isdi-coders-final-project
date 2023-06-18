@@ -24,11 +24,14 @@ app.use(morgan('dev'));
 // Morgan allows you to create your own tokens with the .token() method
 // See node_modules\morgan\index.js
 
-morgan.token('userLoggedToken', (req, _res) =>
-  req.headers.authorization === undefined
-    ? 'No Token'
-    : req.headers.authorization
-);
+morgan
+  .token(
+    'userLoggedToken',
+    (req, _res) => req.headers.authorization ?? 'No Token'
+  )
+  .toString();
+
+// Const payloadOfToken: PayloadToken = Auth.verifyJWTGettingPayload(xx);
 
 morgan.token(
   'userHost',
@@ -43,6 +46,7 @@ export const morganStream = app.use(
         JSON.stringify({
           timeStamp: tokens.date(req, res, 'iso'),
           userLoggedToken: tokens.userLoggedToken(req, res),
+          userEmail: '',
           userHost: tokens.userHost(req, res),
           method: tokens.method(req, res),
           url: tokens.url(req, res),
@@ -55,6 +59,7 @@ export const morganStream = app.use(
 
     // To save the log in dist/request.log
     {
+      // With non relative reference: stream: fs.createWriteStream('request.log'),
       stream: fs.createWriteStream(path.join(__dirname, 'request.log')),
     }
   )
@@ -63,7 +68,7 @@ export const morganStream = app.use(
 app.use(express.json());
 app.use(cors(corsOptions));
 
-// Code to be implemented for statics content
+// Code to be implemented for statics content. It does not work for testing
 // debug({ __dirname });
 // app.use(express.static(path.resolve(__dirname, 'public')));
 app.use('/productmovements', productMovementsRouter);

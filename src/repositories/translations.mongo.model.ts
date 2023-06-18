@@ -12,11 +12,10 @@ export const translationOutputTextSchema = new Schema<TranslationOutputText>(
     },
     outputText: {
       type: String,
-      required: true,
       default: '',
     },
-  },
-  { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } }
+  }
+  // { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } }
 );
 
 export const translationSchema = new Schema<Translation>(
@@ -24,7 +23,10 @@ export const translationSchema = new Schema<Translation>(
     inputText: {
       type: String,
       required: true,
-      unique: true,
+    },
+    inputContext: {
+      type: String,
+      required: true,
     },
     outputTexts: [translationOutputTextSchema],
   },
@@ -36,7 +38,6 @@ translationSchema.set('toJSON', {
     returnedObject.id = returnedObject._id;
     delete returnedObject.__v;
     delete returnedObject._id;
-    delete returnedObject.passwd;
   },
 });
 

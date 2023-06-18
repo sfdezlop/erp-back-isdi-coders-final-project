@@ -12,6 +12,7 @@ export const config = {
   JWT_SECRET: process.env.JWT_SECRET,
 };
 
+// Eliminated because testing does not work:
 export const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const stringSeparator = '_-_';

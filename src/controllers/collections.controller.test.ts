@@ -10,9 +10,9 @@ describe('Given the collection controller', () => {
     groupBy: jest.fn(),
     groupBySet: jest.fn(),
     measure: jest.fn(),
-    readRecordFieldValue: jest.fn(),
     readRecords: jest.fn(),
     sample: jest.fn(),
+    view: jest.fn(),
   } as unknown as CollectionsMongoRepo;
 
   const repoMockWithoutResp = {
@@ -21,9 +21,9 @@ describe('Given the collection controller', () => {
     groupBy: jest.fn().mockReturnValue(null),
     groupBySet: jest.fn().mockReturnValue(null),
     measure: jest.fn().mockReturnValue(null),
-    readRecordFieldValue: jest.fn().mockReturnValue(null),
     readRecords: jest.fn().mockReturnValue(null),
     sample: jest.fn().mockReturnValue(null),
+    view: jest.fn().mockReturnValue(null),
   } as unknown as CollectionsMongoRepo;
   const controllerWithResp = new CollectionsController(repoMockWithResp);
   const controllerWithoutResp = new CollectionsController(repoMockWithoutResp);
@@ -242,9 +242,9 @@ describe('Given the collection controller', () => {
     });
   });
 
-  describe('When the readRecordFieldValue method is called', () => {
+  describe('When the view method is called', () => {
     test('Then, if authorization is not included in the request, it should throw an error', async () => {
-      await controllerWithoutResp.readRecordFieldValue(
+      await controllerWithoutResp.view(
         mockReqWithoutAuthorization,
         mockResp,
         next
@@ -252,7 +252,7 @@ describe('Given the collection controller', () => {
       expect(HTTPError).toThrowError();
     });
     test('Then, if a Bearer formed authorization is not included in the request, it should throw an error', async () => {
-      await controllerWithoutResp.readRecordFieldValue(
+      await controllerWithoutResp.view(
         mockReqWithoutBearerFormedAuthorization,
         mockResp,
         next
@@ -261,20 +261,20 @@ describe('Given the collection controller', () => {
     });
 
     test('Then, if a Bearer formed authorization is included in the request, an error should be thrown when no data is received', async () => {
-      await controllerWithoutResp.readRecordFieldValue(
+      await controllerWithoutResp.view(
         mockReqWithBearerFormedAuthorization,
         mockResp,
         next
       );
       expect(HTTPError).toThrowError();
     });
-    test('Then, if a Bearer formed authorization is included in the request, the readRecordFieldValue method of the repo should have been called and a json respond and its status should be send when data is received', async () => {
-      await controllerWithResp.readRecordFieldValue(
+    test('Then, if a Bearer formed authorization is included in the request, the view method of the repo should have been called and a json respond and its status should be send when data is received', async () => {
+      await controllerWithResp.view(
         mockReqWithBearerFormedAuthorization,
         mockResp,
         next
       );
-      expect(repoMockWithResp.readRecordFieldValue).toHaveBeenCalled();
+      expect(repoMockWithResp.view).toHaveBeenCalled();
       expect(mockResp.json).toHaveBeenCalled();
       expect(mockResp.status).toHaveBeenCalled();
     });

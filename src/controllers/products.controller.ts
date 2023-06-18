@@ -162,14 +162,18 @@ export class ProductsController {
   ) {
     try {
       debug('microserviceQueryByKeyValue-method');
-      if (
-        !req.headers.authorization ||
-        !req.headers.authorization.startsWith('Bearer ')
-      )
+      if (!req.headers.authorization)
         throw new HTTPError(
           401,
           'Unauthorized',
           'A valid token is needed in the authorization header'
+        );
+
+      if (!req.headers.authorization.startsWith('Bearer '))
+        throw new HTTPError(
+          401,
+          'Unauthorized',
+          'A Bearer valid token is needed in the authorization header'
         );
       if (!req.params.id || !req.params.path)
         throw new HTTPError(

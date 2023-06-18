@@ -286,122 +286,6 @@ export class CollectionsMongoRepo {
     return data;
   }
 
-  async readRecords(encodedQuery: string) {
-    debug('readRecords-method');
-    const decodedQuery = decodeURI(encodedQuery);
-
-    const collection = decodedQuery
-      .split('&collection=')[1]
-      .split('&filterfield=')[0];
-    const filterField = decodedQuery
-      .split('&filterfield=')[1]
-      .split('&filtervalue=')[0];
-    const filterValue = decodedQuery
-      .split('&filtervalue=')[1]
-      .split('&searchfield=')[0];
-    const searchField = decodedQuery
-      .split('&searchfield=')[1]
-      .split('&searchvalue=')[0];
-    const searchValue = decodedQuery
-      .split('&searchvalue=')[1]
-      .split('&searchtype=')[0];
-    const searchType = decodedQuery
-      .split('&searchtype=')[1]
-      .split('&queryset=')[0];
-    const querySet = Number(
-      decodedQuery.split('&queryset=')[1].split('&queryrecordsperset=')[0]
-    );
-    const queryRecordsPerSet = Number(
-      decodedQuery.split('&queryrecordsperset=')[1].split('&orderfield=')[0]
-    );
-    const orderField = decodedQuery
-      .split('&orderfield=')[1]
-      .split('&ordertype=')[0];
-    const orderType = decodedQuery
-      .split('&ordertype=')[1]
-      .split('&controlinfo=')[0];
-
-    let CollectionModel: typeof Model;
-
-    switch (collection) {
-      case 'appcollectionfields':
-        CollectionModel = AppCollectionFieldModel;
-        break;
-      case 'brands':
-        CollectionModel = BrandModel;
-        break;
-      case 'productmovements':
-        CollectionModel = ProductMovementModel;
-        break;
-      case 'products':
-        CollectionModel = ProductModel;
-        break;
-      case 'translations':
-        CollectionModel = TranslationModel;
-        break;
-      case 'users':
-        CollectionModel = UserModel;
-        break;
-      default:
-        CollectionModel = UserModel;
-    }
-
-    let searchValueRegexPattern: RegExp; // Contains
-    switch (searchType) {
-      case 'Begins with':
-        searchValueRegexPattern = new RegExp(`^${searchValue}`);
-        break;
-      case 'Ends with':
-        searchValueRegexPattern = new RegExp(`${searchValue}$`);
-        break;
-      case 'Exact match':
-        searchValueRegexPattern = new RegExp(`^${searchValue}$`);
-        break;
-      case 'Contains':
-        searchValueRegexPattern = new RegExp(`${searchValue}`);
-        break;
-      default:
-        // eslint-disable-next-line prefer-regex-literals
-        searchValueRegexPattern = new RegExp(`.*.`);
-    }
-
-    const filterValueObjectPattern =
-      filterValue === ''
-        ? {}
-        : filterField === 'id' || filterField === '_id'
-        ? {
-            _id: new mongoose.Types.ObjectId(filterValue),
-          }
-        : {
-            [filterField]: filterValue,
-          };
-
-    const searchObjectPattern =
-      searchField === 'id' || searchField === '_id'
-        ? { _id: new mongoose.Types.ObjectId(searchValue) }
-        : {
-            [searchField]: { $regex: searchValueRegexPattern },
-          };
-
-    // Mongoose find method does not work passing arguments string or regexp for field id because ObjectID is stored as 12 binary bytes but strings and regex are 24-byte string
-
-    const data = await CollectionModel.find({
-      $and: [filterValueObjectPattern, searchObjectPattern],
-    })
-
-      .skip((querySet - 1) * queryRecordsPerSet)
-      .limit(queryRecordsPerSet)
-      .sort([[orderField, orderType === 'asc' ? 'asc' : 'desc']]);
-    if (!data)
-      throw new HTTPError(
-        404,
-        'Impossible to read at collection' + collection,
-        'Impossible to read at collection' + collection
-      );
-
-    return data;
-  }
-
   async groupBy(encodedQuery: string) {
     debug('groupBy-method');
     const decodedQuery = decodeURI(encodedQuery);
@@ -468,8 +352,7 @@ export class CollectionsMongoRepo {
         searchValueRegexPattern = new RegExp(`${searchValue}`);
         break;
       default:
-        // eslint-disable-next-line prefer-regex-literals
-        searchValueRegexPattern = new RegExp(`.*.`);
+        searchValueRegexPattern = new RegExp(`${searchValue}`);
     }
 
     const searchObjectPattern =
@@ -699,35 +582,198 @@ export class CollectionsMongoRepo {
     {
       measure: string;
       measureDescription: string;
-      filterName: string;
-      filterValue: string;
-      setName: string;
-      setLabel: string;
-      setData: string;
-      setStatus: string;
+      measureLabel: string;
+      measureInput: string;
+      measureOutput: number;
+      measureUnits: string;
+      measureStatus: string;
     }[]
   > {
     debug('measure-method');
 
     const decodedQuery = decodeURI(encodedQuery);
 
-    const measure = decodedQuery.split('&measure=')[1].split('&filtername=')[0];
-    const filterName = decodedQuery
-      .split('&filtername=')[1]
-      .split('&filtervalue=')[0];
+    const measure = decodedQuery
+      .split('&measure=')[1]
+      .split('&measureinput=')[0];
 
-    const filterValue = decodedQuery
-      .split('&filtervalue=')[1]
+    console.log(measure);
+    const measureInput = decodedQuery
+      .split('&measureinput=')[1]
       .split('&controlinfo=')[0];
+    console.log(measureInput);
 
     switch (measure) {
-      case 'productstockunitsbysku': {
-        const data = await ProductMovementModel.aggregate([
-          { $match: { [filterName]: filterValue } },
+      case 'countdocumentsbycollection': {
+        let CollectionModel: typeof Model;
+        switch (measureInput) {
+          case 'appcollectionfields':
+            CollectionModel = AppCollectionFieldModel;
+            break;
+          case 'brands':
+            CollectionModel = BrandModel;
+            break;
+          case 'products':
+            CollectionModel = ProductModel;
+            break;
+          case 'productmovements':
+            CollectionModel = ProductMovementModel;
+            break;
+          case 'requestlogs':
+            CollectionModel = RequestLogModel;
+            break;
+          case 'translations':
+            CollectionModel = TranslationModel;
+            break;
+          case 'users':
+            CollectionModel = UserModel;
+            break;
+          default:
+            CollectionModel = UserModel;
+        }
+
+        const data = await CollectionModel.aggregate([
+          {
+            $addFields: {
+              addedFieldForCountingDocuments: 1,
+            },
+          },
           {
             $group: {
-              _id: '$' + filterName,
-              setData: {
+              _id: 'Total',
+              measureOutput: {
+                $sum: '$addedFieldForCountingDocuments',
+              },
+            },
+          },
+          {
+            $addFields: {
+              measure,
+            },
+          },
+          {
+            $addFields: {
+              measureUnits: 'documents',
+            },
+          },
+          {
+            $addFields: {
+              measureDescription: 'count of documents by collection',
+            },
+          },
+
+          {
+            $addFields: {
+              measureLabel: measureInput,
+            },
+          },
+          {
+            $addFields: {
+              measureInput: '$_id',
+            },
+          },
+          {
+            $addFields: {
+              setStatus: 'calculated',
+            },
+          },
+        ]);
+
+        if (!data || data.length === 0) {
+          return [
+            {
+              measure,
+              measureDescription:
+                'count of documents at collection ' + measureInput,
+              measureLabel: 'collection',
+              measureInput,
+              measureOutput: 0,
+              measureUnits: 'documents',
+              measureStatus:
+                'count of documents at collection' +
+                measureInput +
+                ' not found',
+            },
+          ];
+        }
+
+        return [data[0]];
+      }
+
+      case 'productstockcost': {
+        const data = await ProductMovementModel.aggregate([
+          {
+            $addFields: {
+              unitsXunitaryCost: {
+                $multiply: ['$units', '$costPerUnit'],
+              },
+            },
+          },
+          {
+            $group: {
+              _id: 'Total',
+              measureOutput: {
+                $sum: '$unitsXunitaryCost',
+              },
+            },
+          },
+          {
+            $addFields: {
+              measure,
+            },
+          },
+          {
+            $addFields: {
+              measureUnits: '€',
+            },
+          },
+          {
+            $addFields: {
+              measureDescription: 'stock of product, measured in € of cost',
+            },
+          },
+
+          {
+            $addFields: {
+              measureLabel: 'Total',
+            },
+          },
+          {
+            $addFields: {
+              measureInput: '$_id',
+            },
+          },
+          {
+            $addFields: {
+              setStatus: 'calculated',
+            },
+          },
+        ]);
+
+        if (!data || data.length === 0) {
+          return [
+            {
+              measure,
+              measureDescription: 'stock of products, measured in units',
+              measureLabel: 'all products',
+              measureInput,
+              measureOutput: 0,
+              measureUnits: 'units',
+              measureStatus: 'stock of products not found',
+            },
+          ];
+        }
+
+        return [data[0]];
+      }
+
+      case 'productstockunitsbysku': {
+        const data = await ProductMovementModel.aggregate([
+          { $match: { productSku: measureInput } },
+          {
+            $group: {
+              _id: '$productSku',
+              measureOutput: {
                 $sum: '$units',
               },
             },
@@ -739,18 +785,23 @@ export class CollectionsMongoRepo {
           },
           {
             $addFields: {
+              measureUnits: 'units',
+            },
+          },
+          {
+            $addFields: {
               measureDescription: 'stock of product by sku, measured in units',
             },
           },
 
           {
             $addFields: {
-              setName: 'sku',
+              measureLabel: 'product sku',
             },
           },
           {
             $addFields: {
-              setLabel: '$_id',
+              measureInput: '$_id',
             },
           },
           {
@@ -765,12 +816,71 @@ export class CollectionsMongoRepo {
             {
               measure,
               measureDescription: 'stock of product by sku, measured in units',
-              filterName,
-              filterValue,
-              setName: 'sku',
-              setLabel: filterValue,
-              setData: '0 (no product movements)',
-              setStatus: filterName + '=' + filterValue + ' not found',
+              measureLabel: 'product sku',
+              measureInput,
+              measureOutput: 0,
+              measureUnits: 'units',
+              measureStatus: 'productSku=' + measureInput + ' not found',
+            },
+          ];
+        }
+
+        return [data[0]];
+      }
+
+      case 'productstockunits': {
+        const data = await ProductMovementModel.aggregate([
+          {
+            $group: {
+              _id: 'all products',
+              measureOutput: {
+                $sum: '$units',
+              },
+            },
+          },
+          {
+            $addFields: {
+              measure,
+            },
+          },
+          {
+            $addFields: {
+              measureUnits: 'units',
+            },
+          },
+          {
+            $addFields: {
+              measureDescription: 'stock of products, measured in units',
+            },
+          },
+
+          {
+            $addFields: {
+              measureLabel: 'all products',
+            },
+          },
+          {
+            $addFields: {
+              measureInput: '$_id',
+            },
+          },
+          {
+            $addFields: {
+              setStatus: 'calculated',
+            },
+          },
+        ]);
+
+        if (!data || data.length === 0) {
+          return [
+            {
+              measure,
+              measureDescription: 'stock of products, measured in units',
+              measureLabel: 'all products',
+              measureInput,
+              measureOutput: 0,
+              measureUnits: 'units',
+              measureStatus: 'stock of products not found',
             },
           ];
         }
@@ -783,19 +893,150 @@ export class CollectionsMongoRepo {
           {
             measure,
             measureDescription: 'measure ' + measure + ' is not implemented',
-            filterName,
-            filterValue,
-            setName: 'setName is not defined',
-            setLabel: 'setLabel is not defined',
-            setData: 'not found (backend)',
-            setStatus: 'measure ' + measure + ' is not implemented',
+            measureLabel: 'measureLabel',
+            measureInput,
+            measureOutput: 0,
+            measureUnits: 'measureUnits',
+            measureStatus: 'measure ' + measure + ' is not implemented',
           },
         ];
     }
   }
 
-  async readRecordFieldValue(encodedQuery: string): Promise<unknown[]> {
-    debug('readRecordFieldValue-method');
+  async readRecords(encodedQuery: string) {
+    debug('readRecords-method');
+    const decodedQuery = decodeURI(encodedQuery);
+
+    const collection = decodedQuery
+      .split('&collection=')[1]
+      .split('&filterfield=')[0];
+    const filterField = decodedQuery
+      .split('&filterfield=')[1]
+      .split('&filtervalue=')[0];
+    const filterValue = decodedQuery
+      .split('&filtervalue=')[1]
+      .split('&searchfield=')[0];
+    const searchField = decodedQuery
+      .split('&searchfield=')[1]
+      .split('&searchvalue=')[0];
+    const searchValue = decodedQuery
+      .split('&searchvalue=')[1]
+      .split('&searchtype=')[0];
+    const searchType = decodedQuery
+      .split('&searchtype=')[1]
+      .split('&queryset=')[0];
+    const querySet = Number(
+      decodedQuery.split('&queryset=')[1].split('&queryrecordsperset=')[0]
+    );
+    const queryRecordsPerSet = Number(
+      decodedQuery.split('&queryrecordsperset=')[1].split('&orderfield=')[0]
+    );
+    const orderField = decodedQuery
+      .split('&orderfield=')[1]
+      .split('&ordertype=')[0];
+    const orderType = decodedQuery
+      .split('&ordertype=')[1]
+      .split('&controlinfo=')[0];
+
+    let CollectionModel: typeof Model;
+
+    switch (collection) {
+      case 'appcollectionfields':
+        CollectionModel = AppCollectionFieldModel;
+        break;
+      case 'brands':
+        CollectionModel = BrandModel;
+        break;
+      case 'productmovements':
+        CollectionModel = ProductMovementModel;
+        break;
+      case 'products':
+        CollectionModel = ProductModel;
+        break;
+      case 'translations':
+        CollectionModel = TranslationModel;
+        break;
+      case 'users':
+        CollectionModel = UserModel;
+        break;
+      default:
+        CollectionModel = UserModel;
+    }
+
+    let searchValueRegexPattern: RegExp; // Contains
+    switch (searchType) {
+      case 'Begins with':
+        searchValueRegexPattern = new RegExp(`^${searchValue}`);
+        break;
+      case 'Ends with':
+        searchValueRegexPattern = new RegExp(`${searchValue}$`);
+        break;
+      case 'Exact match':
+        searchValueRegexPattern = new RegExp(`^${searchValue}$`);
+        break;
+      case 'Contains':
+        searchValueRegexPattern = new RegExp(`${searchValue}`);
+        break;
+      default:
+        searchValueRegexPattern = new RegExp(`${searchValue}`);
+    }
+
+    const filterValueObjectPattern =
+      filterValue === ''
+        ? {}
+        : filterField === 'id' || filterField === '_id'
+        ? {
+            _id: new mongoose.Types.ObjectId(filterValue),
+          }
+        : {
+            [filterField]: filterValue,
+          };
+
+    const searchObjectPattern =
+      searchField === 'id' || searchField === '_id'
+        ? { _id: new mongoose.Types.ObjectId(searchValue) }
+        : {
+            [searchField]: { $regex: searchValueRegexPattern },
+          };
+
+    // Mongoose find method does not work passing arguments string or regexp for field id because ObjectID is stored as 12 binary bytes but strings and regex are 24-byte string
+
+    const data = await CollectionModel.find({
+      $and: [filterValueObjectPattern, searchObjectPattern],
+    })
+
+      .skip((querySet - 1) * queryRecordsPerSet)
+      .limit(queryRecordsPerSet)
+      .sort([[orderField, orderType === 'asc' ? 'asc' : 'desc']]);
+    if (!data)
+      throw new HTTPError(
+        404,
+        'Impossible to read at collection' + collection,
+        'Impossible to read at collection' + collection
+      );
+
+    return data;
+  }
+
+  async sample() {
+    debug('sample-method');
+    const data = await UserModel.aggregate([
+      { $addFields: { toStringId: { $toString: '$_id' } } },
+      { $match: { toStringId: '641630973d33d27957edd7b1' } },
+    ]);
+
+    if (!data)
+      throw new HTTPError(
+        404,
+        'Impossible to sample at collection',
+        'Impossible to sample at collection'
+      );
+
+    return data;
+  }
+
+  async view(encodedQuery: string): Promise<unknown[]> {
+    debug('view-method');
 
     const decodedQuery = decodeURI(encodedQuery);
 
@@ -895,23 +1136,6 @@ export class CollectionsMongoRepo {
     }
 
     // Defensive result when there is no groupBy results
-
-    return data;
-  }
-
-  async sample() {
-    debug('sample-method');
-    const data = await UserModel.aggregate([
-      { $addFields: { toStringId: { $toString: '$_id' } } },
-      { $match: { toStringId: '641630973d33d27957edd7b1' } },
-    ]);
-
-    if (!data)
-      throw new HTTPError(
-        404,
-        'Impossible to sample at collection',
-        'Impossible to sample at collection'
-      );
 
     return data;
   }

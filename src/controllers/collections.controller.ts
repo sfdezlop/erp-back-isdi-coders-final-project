@@ -180,41 +180,6 @@ export class CollectionsController {
     }
   }
 
-  async readRecordFieldValue(req: Request, resp: Response, next: NextFunction) {
-    try {
-      debug('readRecordFieldValue-method');
-      if (
-        req.headers.authorization === undefined ||
-        !req.headers.authorization.startsWith('Bearer ')
-      )
-        throw new HTTPError(
-          401,
-          'Unauthorized',
-          'A valid token is needed in the authorization header'
-        );
-      if (!req.params.id)
-        throw new HTTPError(
-          400,
-          'Bad request',
-          'Query Id needed in the request with information about the record to read'
-        );
-
-      const data = await this.repo.readRecordFieldValue(req.path);
-      if (!data)
-        throw new HTTPError(
-          422,
-          'Unprocessable Content',
-          'readRecordFieldValue method has not been applied'
-        );
-      resp.status(200);
-      resp.json({
-        results: data,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
   async readRecords(req: Request, resp: Response, next: NextFunction) {
     try {
       debug('readRecords-method');
@@ -269,6 +234,41 @@ export class CollectionsController {
           422,
           'Unprocessable Content',
           'sample method has not been applied'
+        );
+      resp.status(200);
+      resp.json({
+        results: data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async view(req: Request, resp: Response, next: NextFunction) {
+    try {
+      debug('view-method');
+      if (
+        req.headers.authorization === undefined ||
+        !req.headers.authorization.startsWith('Bearer ')
+      )
+        throw new HTTPError(
+          401,
+          'Unauthorized',
+          'A valid token is needed in the authorization header'
+        );
+      if (!req.params.id)
+        throw new HTTPError(
+          400,
+          'Bad request',
+          'Query Id needed in the request with information about the record to read'
+        );
+
+      const data = await this.repo.view(req.path);
+      if (!data)
+        throw new HTTPError(
+          422,
+          'Unprocessable Content',
+          'view method has not been applied'
         );
       resp.status(200);
       resp.json({
