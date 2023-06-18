@@ -1,6 +1,5 @@
-import jwt from 'jsonwebtoken';
 import path from 'path';
-import { __dirname, config } from './config.js';
+import { __dirname } from './config.js';
 import express, { NextFunction, Request, Response } from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
@@ -11,7 +10,6 @@ import { productsRouter } from './routers/products.router.js';
 import { productMovementsRouter } from './routers/productmovements.router.js';
 import fs from 'fs';
 import { collectionsRouter } from './routers/collections.router.js';
-import { Auth, PayloadToken } from './services/auth.js';
 
 const debug = createDebug('ERP:app');
 export const app = express();
